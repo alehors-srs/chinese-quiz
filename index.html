@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тренировка иероглифов</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #333; min-height: 100vh; padding: 20px; }
+  h1 { text-align: center; color: #2c3e50; margin-bottom: 12px; }
+  .subtitle { text-align: center; color: #7f8c8d; margin-bottom: 20px; font-size: 14px; }
+  .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab { padding: 10px 20px; font-size: 14px; border: 1px solid #bdc3c7; border-radius: 10px; background: #fff; cursor: pointer; transition: all 0.2s; }
+  .tab.active { background: #3498db; color: #fff; border-color: #3498db; }
+  .tab:hover:not(.active) { background: #ecf0f1; }
+  .section { display: none; }
+  .section.active { display: block; }
+  .stats { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+  .stat-box { background: #fff; padding: 10px 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); text-align: center; min-width: 100px; }
+  .stat-box .label { font-size: 12px; color: #95a5a6; text-transform: uppercase; }
+  .stat-box .value { font-size: 22px; font-weight: bold; color: #2c3e50; }
+  .quiz { max-width: 700px; margin: 0 auto; }
+  .card { background: #fff; border-radius: 14px; padding: 18px 22px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); display: flex; align-items: center; gap: 18px; transition: border-color 0.3s; border: 2px solid transparent; }
+  .card.correct { border-color: #27ae60; }
+  .card.wrong { border-color: #e74c3c; }
+  .char { font-size: 38px; min-width: 80px; text-align: center; color: #2c3e50; }
+  .char-ru { font-size: 24px; min-width: 120px; text-align: center; color: #2c3e50; font-weight: bold; }
+  .char-sentence { font-size: 20px; min-width: 140px; max-width: 220px; text-align: center; color: #2c3e50; line-height: 1.4; }
+  .card-body { flex: 1; }
+  .card-body input { width: 100%; padding: 10px 14px; font-size: 16px; border: 1px solid #d0d5db; border-radius: 8px; outline: none; transition: border-color 0.2s; }
+  .card-body input:focus { border-color: #3498db; }
+  .hint { font-size: 13px; color: #95a5a6; margin-top: 6px; display: none; }
+  .hint.show { display: block; }
+  .hint-link { font-size: 12px; color: #3498db; cursor: pointer; margin-top: 4px; display: inline-block; }
+  .actions { display: flex; justify-content: center; gap: 12px; margin: 24px 0; flex-wrap: wrap; }
+  button { padding: 12px 28px; font-size: 16px; border: none; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+  .check-btn { background: #3498db; color: #fff; }
+  .check-btn:hover { background: #2980b9; }
+  .new-btn { background: #2ecc71; color: #fff; }
+  .new-btn:hover { background: #27ae60; }
+  .result-banner { text-align: center; font-size: 20px; font-weight: bold; margin: 16px 0; min-height: 28px; }
+  .score-green { color: #27ae60; }
+  .score-orange { color: #e67e22; }
+  .score-red { color: #e74c3c; }
+</style>
+</head>
+<body>
+<h1>Тренировка иероглифов</h1>
+<div class="tabs">
+  <button class="tab active" onclick="showTab(0)">Иероглифы &rarr; Русский</button>
+  <button class="tab" onclick="showTab(1)">Русский &rarr; Пиньинь</button>
+  <button class="tab" onclick="showTab(2)">Предложения на китайском</button>
+  <button class="tab" onclick="showTab(3)">Предложения на русском</button>
+</div>
+
+<!-- Section 0: Иероглифы → Русский -->
+<div class="section active" id="section-0">
+  <p class="subtitle">Переведите 10 случайных иероглифов на русский язык</p>
+  <div class="stats">
+    <div class="stat-box"><div class="label">Счёт</div><div class="value" id="score-0">0 / 10</div></div>
+  </div>
+  <div class="result-banner" id="result-banner-0"></div>
+  <div class="quiz" id="quiz-0"></div>
+  <div class="actions">
+    <button class="check-btn" id="check-btn-0">Проверить</button>
+    <button class="new-btn" id="new-btn-0">Новый раунд</button>
+  </div>
+</div>
+
+<!-- Section 1: Русский → Пиньинь -->
+<div class="section" id="section-1">
+  <p class="subtitle">Переведите 10 русских слов на пиньинь (или иероглифы)</p>
+  <div class="stats">
+    <div class="stat-box"><div class="label">Счёт</div><div class="value" id="score-1">0 / 10</div></div>
+  </div>
+  <div class="result-banner" id="result-banner-1"></div>
+  <div class="quiz" id="quiz-1"></div>
+  <div class="actions">
+    <button class="check-btn" id="check-btn-1">Проверить</button>
+    <button class="new-btn" id="new-btn-1">Новый раунд</button>
+  </div>
+</div>
+
+<!-- Section 2: Предложения на китайском -->
+<div class="section" id="section-2">
+  <p class="subtitle">Переведите 5 предложений с китайского на русский</p>
+  <div class="stats">
+    <div class="stat-box"><div class="label">Счёт</div><div class="value" id="score-2">0 / 5</div></div>
+  </div>
+  <div class="result-banner" id="result-banner-2"></div>
+  <div class="quiz" id="quiz-2"></div>
+  <div class="actions">
+    <button class="check-btn" id="check-btn-2">Проверить</button>
+    <button class="new-btn" id="new-btn-2">Новый раунд</button>
+  </div>
+</div>
+
+<!-- Section 3: Предложения на русском -->
+<div class="section" id="section-3">
+  <p class="subtitle">Переведите 5 предложений с русского на китайский (самопроверка)</p>
+  <div class="stats">
+    <div class="stat-box"><div class="label">Счёт</div><div class="value" id="score-3">0 / 5</div></div>
+  </div>
+  <div class="result-banner" id="result-banner-3"></div>
+  <div class="quiz" id="quiz-3"></div>
+  <div class="actions">
+    <button class="check-btn" id="check-btn-3">Показать ответы</button>
+    <button class="new-btn" id="new-btn-3">Новый раунд</button>
+  </div>
+</div>
+
+<script>
+let dictionary = [];
+
+fetch('words.json')
+  .then(response => response.json())
+  .then(data => {
+    dictionary = data;
+    renderQuiz0();
+    renderQuiz1();
+    renderQuiz2();
+    renderQuiz3();
+  })
+  .catch(err => {
+    document.getElementById('quiz-0').innerHTML = '<p style="text-align:center;color:#e74c3c;">Ошибка загрузки словаря. Убедитесь, что words.json находится рядом с index.html.</p>';
+    console.error('Error loading words.json:', err);
+  });
+
+// === Utility functions ===
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function normalize(s) {
+  return s.trim().toLowerCase()
+    .replace(/ё/g, 'е')
+    .replace(/[\s,.!?;:]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function normalizePinyin(s) {
+  return s.trim().toLowerCase()
+    .replace(/[āáǎà]/g, 'a')
+    .replace(/[ēéěè]/g, 'e')
+    .replace(/[īíǐì]/g, 'i')
+    .replace(/[ōóǒò]/g, 'o')
+    .replace(/[ūúǔù]/g, 'u')
+    .replace(/[ǖǘǚǜü]/g, 'u')
+    .replace(/[\s,.!?;:]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function hasChinese(text) {
+  return /[\u4e00-\u9fff\u3400-\u4dbf]/.test(text);
+}
+
+function checkAnswer(user, correct) {
+  const u = normalize(user);
+  if (!u) return false;
+  const variants = correct.split(',').map(v => normalize(v));
+  const variants2 = [];
+  for (const v of variants) {
+    for (const sub of v.split(';')) {
+      variants2.push(sub.trim());
+    }
+  }
+  return variants2.some(v => v === u);
+}
+
+function checkPinyinOrChinese(user, pinyinCorrect, charCorrect) {
+  if (!user.trim()) return false;
+  if (hasChinese(user)) {
+    return normalize(user) === normalize(charCorrect);
+  } else {
+    return normalizePinyin(user) === normalizePinyin(pinyinCorrect);
+  }
+}
+
+function toggleHint(link) {
+  const hint = link.nextElementSibling;
+  hint.classList.toggle('show');
+  link.textContent = hint.classList.contains('show') ? 'скрыть ответ' : 'показать ответ';
+}
+
+// === Tab switching ===
+
+function showTab(idx) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('section-' + idx).classList.add('active');
+  document.querySelectorAll('.tab')[idx].classList.add('active');
+}
+
+// === Section 0: Иероглифы → Русский ===
+
+function renderQuiz0() {
+  if (dictionary.length === 0) return;
+  const quiz = document.getElementById('quiz-0');
+  quiz.innerHTML = '';
+  document.getElementById('result-banner-0').textContent = '';
+  document.getElementById('score-0').textContent = '0 / 10';
+  const selected = shuffle(dictionary).slice(0, Math.min(10, dictionary.length));
+  selected.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="char">${item.char}</div>
+      <div class="card-body">
+        <input type="text" placeholder="Перевод на русский…" data-correct="${item.translation.replace(/"/g, '&quot;')}" data-pinyin="${item.pinyin || ''}">
+        <span class="hint-link" onclick="toggleHint(this)">показать ответ</span>
+        <div class="hint">Пиньинь: ${item.pinyin || '—'} | Перевод: ${item.translation}</div>
+      </div>
+    `;
+    quiz.appendChild(card);
+  });
+  const inputs = quiz.querySelectorAll('input');
+  inputs.forEach((inp, idx) => {
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (idx < inputs.length - 1) inputs[idx + 1].focus();
+        else document.getElementById('check-btn-0').click();
+      }
+    });
+  });
+}
+
+document.getElementById('check-btn-0').addEventListener('click', () => {
+  const cards = document.querySelectorAll('#quiz-0 .card');
+  let count = 0;
+  cards.forEach(card => {
+    const input = card.querySelector('input');
+    const correct = input.dataset.correct;
+    const user = input.value;
+    const ok = checkAnswer(user, correct);
+    card.classList.remove('correct', 'wrong');
+    card.classList.add(ok ? 'correct' : 'wrong');
+    if (ok) count++;
+  });
+  document.getElementById('score-0').textContent = count + ' / 10';
+  const banner = document.getElementById('result-banner-0');
+  if (count === 10) {
+    banner.textContent = 'Идеально! 10 из 10! \u{1F389}';
+    banner.className = 'result-banner score-green';
+  } else if (count >= 7) {
+    banner.textContent = 'Хорошо! ' + count + ' из 10';
+    banner.className = 'result-banner score-orange';
+  } else {
+    banner.textContent = 'Нужно больше практики — ' + count + ' из 10';
+    banner.className = 'result-banner score-red';
+  }
+});
+
+document.getElementById('new-btn-0').addEventListener('click', () => {
+  renderQuiz0();
+});
+
+// === Section 1: Русский → Пиньинь ===
+
+function renderQuiz1() {
+  if (dictionary.length === 0) return;
+  const quiz = document.getElementById('quiz-1');
+  quiz.innerHTML = '';
+  document.getElementById('result-banner-1').textContent = '';
+  document.getElementById('score-1').textContent = '0 / 10';
+  const selected = shuffle(dictionary).slice(0, Math.min(10, dictionary.length));
+  selected.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="char-ru">${item.translation}</div>
+      <div class="card-body">
+        <input type="text" placeholder="Пиньинь или иероглифы…" data-pinyin="${item.pinyin || ''}" data-char="${item.char}">
+        <span class="hint-link" onclick="toggleHint(this)">показать ответ</span>
+        <div class="hint">Пиньинь: ${item.pinyin || '—'} | Иероглиф: ${item.char}</div>
+      </div>
+    `;
+    quiz.appendChild(card);
+  });
+  const inputs = quiz.querySelectorAll('input');
+  inputs.forEach((inp, idx) => {
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (idx < inputs.length - 1) inputs[idx + 1].focus();
+        else document.getElementById('check-btn-1').click();
+      }
+    });
+  });
+}
+
+document.getElementById('check-btn-1').addEventListener('click', () => {
+  const cards = document.querySelectorAll('#quiz-1 .card');
+  let count = 0;
+  cards.forEach(card => {
+    const input = card.querySelector('input');
+    const pinyinCorrect = input.dataset.pinyin;
+    const charCorrect = input.dataset.char;
+    const user = input.value;
+    const ok = checkPinyinOrChinese(user, pinyinCorrect, charCorrect);
+    card.classList.remove('correct', 'wrong');
+    card.classList.add(ok ? 'correct' : 'wrong');
+    if (ok) count++;
+  });
+  document.getElementById('score-1').textContent = count + ' / 10';
+  const banner = document.getElementById('result-banner-1');
+  if (count === 10) {
+    banner.textContent = 'Идеально! 10 из 10! \u{1F389}';
+    banner.className = 'result-banner score-green';
+  } else if (count >= 7) {
+    banner.textContent = 'Хорошо! ' + count + ' из 10';
+    banner.className = 'result-banner score-orange';
+  } else {
+    banner.textContent = 'Нужно больше практики — ' + count + ' из 10';
+    banner.className = 'result-banner score-red';
+  }
+});
+
+document.getElementById('new-btn-1').addEventListener('click', () => {
+  renderQuiz1();
+});
+
+// === Sentence templates ===
+
+const sentenceTemplates = [
+  { cn: "我喜欢{char}", ru: "Мне нравится {translation}", pinyin: "wǒ xǐhuān {pinyin}" },
+  { cn: "这是{char}", ru: "Это {translation}", pinyin: "zhè shì {pinyin}" },
+  { cn: "他没有{char}", ru: "У него нет {translation}", pinyin: "tā méiyǒu {pinyin}" },
+  { cn: "她要买{char}", ru: "Она хочет купить {translation}", pinyin: "tā yào mǎi {pinyin}" },
+  { cn: "我要{char}", ru: "Я хочу {translation}", pinyin: "wǒ yào {pinyin}" },
+  { cn: "这是我的{char}", ru: "Это мой {translation}", pinyin: "zhè shì wǒ de {pinyin}" },
+  { cn: "她喜欢{char}", ru: "Ей нравится {translation}", pinyin: "tā xǐhuān {pinyin}" },
+  { cn: "我们有{char}", ru: "У нас есть {translation}", pinyin: "wǒmen yǒu {pinyin}" },
+  { cn: "我没有{char}", ru: "У меня нет {translation}", pinyin: "wǒ méiyǒu {pinyin}" },
+  { cn: "他在买{char}", ru: "Он покупает {translation}", pinyin: "tā zài mǎi {pinyin}" },
+  { cn: "我要吃{char}", ru: "Я хочу съесть {translation}", pinyin: "wǒ yào chī {pinyin}" },
+  { cn: "这是{char}吗？", ru: "Это {translation}?", pinyin: "zhè shì {pinyin} ma" },
+  { cn: "你的{char}", ru: "Твой {translation}", pinyin: "nǐ de {pinyin}" },
+  { cn: "我喜欢这个{char}", ru: "Мне нравится этот {translation}", pinyin: "wǒ xǐhuān zhège {pinyin}" },
+  { cn: "他在喝{char}", ru: "Он пьёт {translation}", pinyin: "tā zài hē {pinyin}" },
+];
+
+function generateSentences(count) {
+  const selected = shuffle(dictionary).slice(0, Math.min(count, dictionary.length));
+  const templates = shuffle(sentenceTemplates);
+  return selected.map((item, i) => {
+    const tpl = templates[i % templates.length];
+    return {
+      cn: tpl.cn.replace('{char}', item.char),
+      ru: tpl.ru.replace('{translation}', item.translation),
+      pinyin: tpl.pinyin.replace('{pinyin}', item.pinyin),
+      char: item.char,
+      translation: item.translation,
+      wordPinyin: item.pinyin
+    };
+  });
+}
+
+// === Section 2: Предложения на китайском ===
+
+function renderQuiz2() {
+  if (dictionary.length === 0) return;
+  const quiz = document.getElementById('quiz-2');
+  quiz.innerHTML = '';
+  document.getElementById('result-banner-2').textContent = '';
+  document.getElementById('score-2').textContent = '0 / 5';
+  const sentences = generateSentences(5);
+  sentences.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="char-sentence">${item.cn}</div>
+      <div class="card-body">
+        <input type="text" placeholder="Перевод на русский…" data-correct="${item.ru.replace(/"/g, '&quot;')}">
+        <span class="hint-link" onclick="toggleHint(this)">показать ответ</span>
+        <div class="hint">Перевод: ${item.ru}</div>
+      </div>
+    `;
+    quiz.appendChild(card);
+  });
+  const inputs = quiz.querySelectorAll('input');
+  inputs.forEach((inp, idx) => {
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (idx < inputs.length - 1) inputs[idx + 1].focus();
+        else document.getElementById('check-btn-2').click();
+      }
+    });
+  });
+}
+
+document.getElementById('check-btn-2').addEventListener('click', () => {
+  const cards = document.querySelectorAll('#quiz-2 .card');
+  let count = 0;
+  cards.forEach(card => {
+    const input = card.querySelector('input');
+    const correct = input.dataset.correct;
+    const user = input.value;
+    const ok = checkAnswer(user, correct);
+    card.classList.remove('correct', 'wrong');
+    card.classList.add(ok ? 'correct' : 'wrong');
+    if (ok) count++;
+  });
+  document.getElementById('score-2').textContent = count + ' / 5';
+  const banner = document.getElementById('result-banner-2');
+  if (count === 5) {
+    banner.textContent = 'Идеально! 5 из 5! \u{1F389}';
+    banner.className = 'result-banner score-green';
+  } else if (count >= 3) {
+    banner.textContent = 'Хорошо! ' + count + ' из 5';
+    banner.className = 'result-banner score-orange';
+  } else {
+    banner.textContent = 'Нужно больше практики — ' + count + ' из 5';
+    banner.className = 'result-banner score-red';
+  }
+});
+
+document.getElementById('new-btn-2').addEventListener('click', () => {
+  renderQuiz2();
+});
+
+// === Section 3: Предложения на русском ===
+
+function renderQuiz3() {
+  if (dictionary.length === 0) return;
+  const quiz = document.getElementById('quiz-3');
+  quiz.innerHTML = '';
+  document.getElementById('result-banner-3').textContent = '';
+  document.getElementById('score-3').textContent = '0 / 5';
+  const sentences = generateSentences(5);
+  sentences.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="char-sentence">${item.ru}</div>
+      <div class="card-body">
+        <input type="text" placeholder="Пиньинь или иероглифы…" data-pinyin="${item.pinyin}" data-char="${item.cn}">
+        <span class="hint-link" onclick="toggleHint(this)">показать ответ</span>
+        <div class="hint">Иероглифы: ${item.cn} | Пиньинь: ${item.pinyin}</div>
+      </div>
+    `;
+    quiz.appendChild(card);
+  });
+  const inputs = quiz.querySelectorAll('input');
+  inputs.forEach((inp, idx) => {
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (idx < inputs.length - 1) inputs[idx + 1].focus();
+        else document.getElementById('check-btn-3').click();
+      }
+    });
+  });
+}
+
+document.getElementById('check-btn-3').addEventListener('click', () => {
+  const cards = document.querySelectorAll('#quiz-3 .card');
+  let count = 0;
+  let hasInput = false;
+  cards.forEach(card => {
+    const input = card.querySelector('input');
+    const pinyinCorrect = input.dataset.pinyin;
+    const charCorrect = input.dataset.char;
+    const user = input.value;
+    if (user.trim()) hasInput = true;
+    const ok = checkPinyinOrChinese(user, pinyinCorrect, charCorrect);
+    card.classList.remove('correct', 'wrong');
+    card.classList.add(ok ? 'correct' : 'wrong');
+    if (ok) count++;
+    const hint = card.querySelector('.hint');
+    hint.classList.add('show');
+    const link = card.querySelector('.hint-link');
+    if (link) link.textContent = 'скрыть ответ';
+  });
+  if (hasInput) {
+    document.getElementById('score-3').textContent = count + ' / 5';
+    const banner = document.getElementById('result-banner-3');
+    if (count === 5) {
+      banner.textContent = 'Идеально! 5 из 5! \u{1F389}';
+      banner.className = 'result-banner score-green';
+    } else if (count >= 3) {
+      banner.textContent = 'Хорошо! ' + count + ' из 5';
+      banner.className = 'result-banner score-orange';
+    } else {
+      banner.textContent = 'Нужно больше практики — ' + count + ' из 5';
+      banner.className = 'result-banner score-red';
+    }
+  } else {
+    document.getElementById('result-banner-3').textContent = 'Ответы показаны. Оцените себя.';
+    document.getElementById('result-banner-3').className = 'result-banner score-orange';
+  }
+});
+
+document.getElementById('new-btn-3').addEventListener('click', () => {
+  renderQuiz3();
+});
+</script>
+</body>
+</html>
