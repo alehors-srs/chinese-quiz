@@ -1,6 +1,6 @@
 // Словарь для тренажёра иероглифов
 // Сгенерировано из Excel-файла.
-const WORDS = [
+window.dictionary = [
   {
     "char": "你",
     "pinyin": "nĭ",
