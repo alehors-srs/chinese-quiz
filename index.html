@@ -264,7 +264,7 @@ function renderQuiz2() {
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
-      <div class="char" style="font-size: 22px;">${item.translation}</div>
+      <div class="char";">${item.translation}</div>
       <div class="card-body">
         <input type="text" placeholder="Введите пиньинь…" data-pinyin="${item.pinyin}" data-char="${item.char}">
         <span class="hint-link" onclick="toggleHint2(this)">показать ответ</span>
