@@ -6,7 +6,14 @@
 <title>Тренировка иероглифов</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #333; min-height: 100vh; padding: 20px; }
+  body { margin: 0;
+      min-height: 100vh;           /* чтобы фон был на всю высоту экрана */
+      background-color: #f0f0f0;   /* запасной цвет, если картинка не загрузится */
+      background-image: url("images/background.jpg");
+      background-position: center; /* центрируем картинку */
+      background-size: cover;      /* заполняем область, обрезая лишнее */
+      background-repeat: no-repeat;/* не повторяем */
+    }
   h1 { text-align: center; color: #2c3e50; margin-bottom: 8px; }
   .subtitle { text-align: center; color: #7f8c8d; margin-bottom: 20px; font-size: 14px; }
   .stats { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
@@ -148,6 +155,7 @@
   <div class="tab" data-tab="tab2">АБВ - 字</div>
   <div class="tab" data-tab="tab5">Последние 50</div>
   <div class="tab" data-tab="tab6">Словарь</div>
+  <div class="tab" data-tab="tab8">Имена</div>
   <div class="tab" data-tab="tab7">Тест</div>
 </div>
 
@@ -193,6 +201,15 @@
   <div class="dict-results" id="dict-results"></div>
 </div>
 
+<!-- TAB 8: Имена -->
+<div class="tab-content" id="tab8">
+  <p class="subtitle">Поиск по именам, пиньиню и русским словам</p>
+  <div class="dict-search-wrap">
+    <input type="text" class="dict-search-input" id="names-search" placeholder="Введите имя, пиньинь или русское слово…">
+  </div>
+  <div class="dict-results" id="names-results"></div>
+</div>
+
 
 <!-- TAB 7: Тест -->
 <div class="tab-content" id="tab7">
@@ -236,6 +253,7 @@
 
 <!-- Load dictionary from external file (works with file:// protocol) -->
 <script src="words.js"></script>
+<script src="names.js"></script>
 <script>
 // Check if dictionary loaded
 if (!window.dictionary) {
@@ -721,6 +739,89 @@ document.getElementById('dict-search').addEventListener('input', (e) => {
 
 // Show all words initially
 renderDictResults(dictionary);
+
+
+// === TAB 8: Имена ===
+
+const namesData = window.names || [];
+
+function searchNames(query) {
+  const q = query.trim().toLowerCase();
+  if (!q) return namesData;
+
+  const results = [];
+  const seen = new Set();
+
+  namesData.forEach(item => {
+    let match = false;
+
+    // Search by Chinese character
+    if (item.char && item.char.includes(query.trim())) {
+      match = true;
+    }
+
+    // Search by pinyin (with and without tones)
+    if (item.pinyin) {
+      const pinyinNorm = normalizePinyin(item.pinyin);
+      const qNorm = normalizePinyin(q);
+      if (pinyinNorm.includes(qNorm) || item.pinyin.toLowerCase().includes(q)) {
+        match = true;
+      }
+    }
+
+    // Search by Russian translation
+    if (item.translation) {
+      const transNorm = normalize(item.translation);
+      const qTransNorm = normalize(q);
+      if (transNorm.includes(qTransNorm)) {
+        match = true;
+      }
+    }
+
+    if (match) {
+      const key = item.char + '|' + item.pinyin + '|' + item.translation;
+      if (!seen.has(key)) {
+        seen.add(key);
+        results.push(item);
+      }
+    }
+  });
+
+  return results;
+}
+
+function renderNamesResults(results) {
+  const container = document.getElementById('names-results');
+  if (!container) return;
+  if (results.length === 0) {
+    container.innerHTML = '<div class="dict-empty">Ничего не найдено. Попробуйте другой запрос.</div>';
+    return;
+  }
+  container.innerHTML = '';
+  results.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'dict-item';
+    div.innerHTML = `
+      <div class="dict-char">${item.char}</div>
+      <button class="speak-btn-sm" onclick="speakChinese('${item.char}')">🔊</button>
+      <div class="dict-info">
+        <div class="dict-pinyin">${item.pinyin || '—'}</div>
+        <div class="dict-translation">${item.translation}</div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+const namesSearchInput = document.getElementById('names-search');
+if (namesSearchInput) {
+  namesSearchInput.addEventListener('input', (e) => {
+    const results = searchNames(e.target.value);
+    renderNamesResults(results);
+  });
+  // Show all names initially
+  renderNamesResults(namesData);
+}
 
 // === TAB 7: Тест ===
 
