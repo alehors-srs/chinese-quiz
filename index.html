@@ -123,8 +123,9 @@
   .result-row.ok { background: #eafaf1; border-left: 4px solid #27ae60; }
   .result-row.err { background: #fdedec; border-left: 4px solid #e74c3c; }
   .result-mark { font-size: 20px; font-weight: bold; }
-  .result-char { font-size: 28px; min-width: 40px; text-align: center; }
-  .result-pinyin { font-size: 15px; color: #3498db; font-weight: 600; min-width: 0px; }
+  .result-char { font-size: 28px; min-width: 60px; text-align: center; }
+  .result-pinyin { font-size: 15px; color: #3498db; font-weight: 600; }
+  .result-char-pinyin { display: flex; flex-direction: column; align-items: center; min-width: 80px; }
   .result-translation { font-size: 16px; color: #333; flex: 1; }
   .result-user-answer { font-size: 14px; color: #e74c3c; }
 
@@ -627,10 +628,11 @@ function showQuizResults(results, banner) {
     row.className = 'result-row ' + (r.correct ? 'ok' : 'err');
     row.innerHTML = `
       <div class="result-mark">${r.correct ? '✓' : '✗'}</div>
-      <div class="result-char">${r.char}</div>
-      <div class="result-pinyin">${r.pinyin}</div>
+      <div class="result-char-pinyin">
+        <div class="result-char">${r.char}</div>
+        <div class="result-pinyin">${r.pinyin}</div>
+      </div>
       <div class="result-translation">${r.translation}</div>
-
     `;
     list.appendChild(row);
   });
@@ -823,10 +825,11 @@ function showTestResult() {
     row.className = 'result-row ' + (q.isCorrect ? 'ok' : 'err');
     row.innerHTML = `
       <div class="result-mark">${q.isCorrect ? '✓' : '✗'}</div>
-      <div class="result-char">${q.char}</div>
-      <div class="result-pinyin">${q.pinyin}</div>
+      <div class="result-char-pinyin">
+        <div class="result-char">${q.char}</div>
+        <div class="result-pinyin">${q.pinyin}</div>
+      </div>
       <div class="result-translation">${q.correct}</div>
-
     `;
     listDiv.appendChild(row);
   });
