@@ -19,7 +19,8 @@
   max-width: 700px;
   margin: 0 auto;
 }
-  .card { background: #fff; border-radius: 14px; padding: 18px 22px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); display: flex; align-items: center; gap: 18px; transition: border-color 0.3s; border: 2px solid transparent; }
+  .card { background: #fff; border-radius: 14px; padding: 18px 22px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); display: flex; flex-direction: column; gap: 14px; transition: border-color 0.3s; border: 2px solid transparent; }
+  .card-top { display: flex; align-items: center; gap: 18px; }
   .card.correct { border-color: #27ae60; }
   .card.wrong { border-color: #e74c3c; }
   .char { font-size: 38px; min-width: 80px; text-align: center; color: #2c3e50; }
@@ -344,8 +345,10 @@ function renderQuizCard() {
   card.className = 'card';
   card.id = 'quiz-card-current';
   card.innerHTML = `
-    <div class="char">${item.char}</div>
-    <button class="speak-btn" onclick="speakChinese('${item.char}')">🔊</button>
+    <div class="card-top">
+      <div class="char">${item.char}</div>
+      <button class="speak-btn" onclick="speakChinese('${item.char}')">🔊</button>
+    </div>
     <div class="card-body">
       <input type="text" placeholder="Перевод на русский…" id="quiz-input" data-correct="${item.translation.replace(/"/g, '&quot;')}" data-pinyin="${item.pinyin || ''}">
       <span class="hint-link" onclick="toggleHint(this)">показать ответ</span>
@@ -439,8 +442,10 @@ function renderQuiz2Card() {
   card.className = 'card';
   card.id = 'quiz2-card-current';
   card.innerHTML = `
-    <div class="char" style="font-size: 16px;">${item.translation}</div>
-    <button class="speak-btn" onclick="speakChinese('${item.char}')">🔊</button>
+    <div class="card-top">
+      <div class="char" style="font-size: 16px;">${item.translation}</div>
+      <button class="speak-btn" onclick="speakChinese('${item.char}')">🔊</button>
+    </div>
     <div class="card-body">
       <input type="text" placeholder="Введите пиньинь или иероглиф…" id="quiz2-input" data-pinyin="${item.pinyin}" data-char="${item.char}">
       <span class="hint-link" onclick="toggleHint2(this)">показать ответ</span>
@@ -539,8 +544,10 @@ function renderQuiz5Card() {
   card.className = 'card';
   card.id = 'quiz5-card-current';
   card.innerHTML = `
-    <div class="char">${item.char}</div>
-    <button class="speak-btn" onclick="speakChinese('${item.char}')">🔊</button>
+    <div class="card-top">
+      <div class="char">${item.char}</div>
+      <button class="speak-btn" onclick="speakChinese('${item.char}')">🔊</button>
+    </div>
     <div class="card-body">
       <input type="text" placeholder="Перевод на русский…" id="quiz5-input" data-correct="${item.translation.replace(/"/g, '&quot;')}" data-pinyin="${item.pinyin || ''}">
       <span class="hint-link" onclick="toggleHint5(this)">показать ответ</span>
@@ -623,7 +630,7 @@ function showQuizResults(results, banner) {
       <div class="result-char">${r.char}</div>
       <div class="result-pinyin">${r.pinyin}</div>
       <div class="result-translation">${r.translation}</div>
-      ${r.correct ? '' : '<div class="result-user-answer">Ваш ответ: ' + r.userAnswer + '</div>'}
+
     `;
     list.appendChild(row);
   });
@@ -819,7 +826,7 @@ function showTestResult() {
       <div class="result-char">${q.char}</div>
       <div class="result-pinyin">${q.pinyin}</div>
       <div class="result-translation">${q.correct}</div>
-      ${q.isCorrect ? '' : '<div class="result-user-answer">Ваш ответ: ' + q.userAnswer + '</div>'}
+
     `;
     listDiv.appendChild(row);
   });
