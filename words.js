@@ -919,7 +919,7 @@ window.dictionary = [
   {
     "char": "吧",
     "pinyin": "ba",
-    "translation": "побуждение или предположение"
+    "translation": "побуждение, предположение"
   },
   {
     "char": "电影院",
