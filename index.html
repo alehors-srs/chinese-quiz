@@ -82,6 +82,28 @@
   .speak-btn-sm { background: #5d9ee8; color: #fff; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.2s; }
   .speak-btn-sm:hover { background: #134f94; }
 
+  /* Test tab */
+  .test-container { max-width: 600px; margin: 0 auto; }
+  .test-start, .test-result { text-align: center; padding: 40px 20px; }
+  .test-start h2, .test-result h2 { color: #2c3e50; margin-bottom: 16px; font-size: 22px; }
+  .test-start p { color: #7f8c8d; margin-bottom: 24px; font-size: 15px; }
+  .test-card { background: #fff; border-radius: 16px; padding: 32px 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); text-align: center; }
+  .test-progress { font-size: 13px; color: #95a5a6; margin-bottom: 20px; }
+  .test-char { font-size: 48px; color: #2c3e50; margin-bottom: 4px; }
+  .test-pinyin { font-size: 16px; color: #95a5a6; margin-bottom: 24px; }
+  .test-options { display: flex; flex-direction: column; gap: 10px; }
+  .test-option { padding: 14px 20px; font-size: 16px; border: 2px solid #e0e6ed; border-radius: 10px; background: #fff; cursor: pointer; transition: all 0.2s; color: #333; }
+  .test-option:hover:not(.disabled) { border-color: #3498db; background: #f8fbfe; }
+  .test-option.correct { border-color: #27ae60; background: #eafaf1; color: #27ae60; }
+  .test-option.wrong { border-color: #e74c3c; background: #fdedec; color: #e74c3c; }
+  .test-option.disabled { cursor: default; }
+  .test-option.disabled:hover { border-color: #e0e6ed; background: #fff; }
+  .test-option.disabled.correct:hover { border-color: #27ae60; background: #eafaf1; }
+  .test-option.disabled.wrong:hover { border-color: #e74c3c; background: #fdedec; }
+  .test-result-score { font-size: 36px; font-weight: bold; margin: 12px 0; }
+  .test-progress-bar { width: 100%; height: 6px; background: #ecf0f1; border-radius: 3px; margin-bottom: 24px; overflow: hidden; }
+  .test-progress-bar-fill { height: 100%; background: #3498db; border-radius: 3px; transition: width 0.3s; }
+
 </style>
 <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
 </head>
@@ -93,6 +115,7 @@
   <div class="tab" data-tab="tab2">Русский → Иероглифы</div>
   <div class="tab" data-tab="tab5">Последние 50</div>
   <div class="tab" data-tab="tab6">Словарь</div>
+  <div class="tab" data-tab="tab7">Тест</div>
 </div>
 
 <!-- TAB 1: Иероглифы → Русский -->
@@ -135,6 +158,31 @@
     <input type="text" class="dict-search-input" id="dict-search" placeholder="Введите иероглиф, пиньинь или русское слово…">
   </div>
   <div class="dict-results" id="dict-results"></div>
+</div>
+
+<!-- TAB 7: Тест -->
+<div class="tab-content" id="tab7">
+  <div class="test-container">
+    <!-- Start screen -->
+    <div id="test-start" class="test-start">
+      <h2>Тест по иероглифам</h2>
+      <p>10 карточек с иероглифами и 4 вариантами перевода. Выберите правильный ответ — и следующая карточка появится автоматически.</p>
+      <button id="test-start-btn" style="background: #3498db; color: #fff;">Начать тест</button>
+    </div>
+    <!-- Question screen -->
+    <div id="test-question" style="display: none;">
+      <div class="test-progress-bar"><div class="test-progress-bar-fill" id="test-progress-fill"></div></div>
+      <div class="test-progress" id="test-progress-text"></div>
+      <div class="test-card" id="test-card"></div>
+    </div>
+    <!-- Result screen -->
+    <div id="test-result" class="test-result" style="display: none;">
+      <h2>Результат</h2>
+      <div class="test-result-score" id="test-score"></div>
+      <p id="test-message"></p>
+      <button id="test-restart-btn" style="background: #2ecc71; color: #fff;">Начать тест заново</button>
+    </div>
+  </div>
 </div>
 
 <!-- Load dictionary from external file (works with file:// protocol) -->
@@ -493,6 +541,118 @@ document.getElementById('dict-search').addEventListener('input', (e) => {
 
 // Show all words initially
 renderDictResults(dictionary);
+
+// === TAB 7: Тест ===
+
+let testQuestions = [];
+let testCurrentIndex = 0;
+let testScore = 0;
+
+function startTest() {
+  testQuestions = [];
+  testCurrentIndex = 0;
+  testScore = 0;
+
+  const pool = shuffle(dictionary).slice(0, Math.min(10, dictionary.length));
+  pool.forEach(item => {
+    const wrongs = shuffle(dictionary.filter(d => d.translation !== item.translation)).slice(0, 3);
+    const options = shuffle([item, ...wrongs]).map(d => d.translation);
+    testQuestions.push({
+      char: item.char,
+      pinyin: item.pinyin || '',
+      correct: item.translation,
+      options: options
+    });
+  });
+
+  document.getElementById('test-start').style.display = 'none';
+  document.getElementById('test-result').style.display = 'none';
+  document.getElementById('test-question').style.display = 'block';
+
+  renderTestQuestion();
+}
+
+function renderTestQuestion() {
+  const q = testQuestions[testCurrentIndex];
+  const card = document.getElementById('test-card');
+  const progressText = document.getElementById('test-progress-text');
+  const progressFill = document.getElementById('test-progress-fill');
+
+  progressText.textContent = 'Карточка ' + (testCurrentIndex + 1) + ' из ' + testQuestions.length;
+  progressFill.style.width = ((testCurrentIndex / testQuestions.length) * 100) + '%';
+
+  card.innerHTML = `
+    <div class="test-char">${q.char}</div>
+    <div class="test-pinyin">${q.pinyin}</div>
+    <div class="test-options">
+      ${q.options.map((opt, i) => `<div class="test-option" data-option="${i}" data-value="${opt.replace(/"/g, '&quot;')}">${opt}</div>`).join('')}
+    </div>
+  `;
+
+  card.querySelectorAll('.test-option').forEach(btn => {
+    btn.addEventListener('click', handleTestAnswer);
+  });
+}
+
+function handleTestAnswer(e) {
+  const selected = e.currentTarget;
+  const q = testQuestions[testCurrentIndex];
+  const options = document.querySelectorAll('.test-option');
+
+  options.forEach(opt => {
+    opt.classList.add('disabled');
+    opt.removeEventListener('click', handleTestAnswer);
+    if (opt.dataset.value === q.correct) {
+      opt.classList.add('correct');
+    }
+    if (opt === selected && opt.dataset.value !== q.correct) {
+      opt.classList.add('wrong');
+    }
+  });
+
+  if (selected.dataset.value === q.correct) {
+    testScore++;
+  }
+
+  testCurrentIndex++;
+
+  if (testCurrentIndex < testQuestions.length) {
+    setTimeout(() => {
+      renderTestQuestion();
+    }, 1000);
+  } else {
+    document.getElementById('test-progress-fill').style.width = '100%';
+    setTimeout(() => {
+      showTestResult();
+    }, 1000);
+  }
+}
+
+function showTestResult() {
+  document.getElementById('test-question').style.display = 'none';
+  document.getElementById('test-result').style.display = 'block';
+
+  const scoreDiv = document.getElementById('test-score');
+  const msgP = document.getElementById('test-message');
+  const total = testQuestions.length;
+
+  scoreDiv.textContent = testScore + ' / ' + total;
+
+  if (testScore === total) {
+    scoreDiv.className = 'test-result-score score-green';
+    msgP.textContent = 'Идеально! Все ответы верны! 🎉';
+  } else if (testScore >= Math.ceil(total * 0.7)) {
+    scoreDiv.className = 'test-result-score score-orange';
+    msgP.textContent = 'Хороший результат!';
+  } else {
+    scoreDiv.className = 'test-result-score score-red';
+    msgP.textContent = 'Нужно больше практики!';
+  }
+}
+
+document.getElementById('test-start-btn').addEventListener('click', startTest);
+document.getElementById('test-restart-btn').addEventListener('click', startTest);
+
 </script>
 </body>
 </html>
