@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+7<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -77,10 +77,13 @@
   .dict-translation { font-size: 16px; color: #333; }
   .dict-empty { text-align: center; color: #95a5a6; font-size: 16px; padding: 30px; }
 
-  .speak-btn { background: #e67e22; color: #fff; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.2s; }
+  .speak-btn { background: #e67e22; color: #fff; border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.2s; }
   .speak-btn:hover { background: #d35400; }
-  .speak-btn-sm { width: 32px; height: 32px; font-size: 15px; }
+  .speak-btn-sm { background: #e67e22; color: #fff; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.2s; }
+  .speak-btn-sm:hover { background: #d35400; }
+
 </style>
+<script src="https://code.responsivevoice.org/responsivevoice.js"></script>
 </head>
 <body>
 <h1>Тренировка иероглифов</h1>
@@ -142,18 +145,21 @@ if (!window.dictionary) {
   document.body.innerHTML = '<div class="loading">Ошибка: файл words.js не найден. Убедитесь, что words.js лежит рядом с index.html.</div>';
 }
 
-// === SPEECH SYNTHESIS ===
+const dictionary = window.dictionary;
+
+// === RESPONSIVEVOICE TTS ===
 function speakChinese(text) {
-  if ('speechSynthesis' in window) {
+  if (typeof responsiveVoice !== 'undefined') {
+    responsiveVoice.cancel();
+    responsiveVoice.speak(text, 'Chinese Female', {rate: 0.72});
+  } else if ('speechSynthesis' in window) {
     speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'zh-CN';
-    utterance.rate = 0.72;
-    speechSynthesis.speak(utterance);
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'zh-CN';
+    u.rate = 0.72;
+    speechSynthesis.speak(u);
   }
 }
-
-const dictionary = window.dictionary;
 
 // === UTILITIES ===
 function shuffle(arr) {
@@ -223,7 +229,7 @@ function renderQuiz() {
     card.className = 'card';
     card.innerHTML = `
       <div class="char">${item.char}</div>
-      <button class="speak-btn" onclick="speakChinese('${item.char}')" title="Произнести">🔊</button>
+      <button class="speak-btn" onclick="speakChinese('${item.char}')">🔊</button>
       <div class="card-body">
         <input type="text" placeholder="Перевод на русский…" data-correct="${item.translation.replace(/"/g, '&quot;')}" data-pinyin="${item.pinyin || ''}">
         <span class="hint-link" onclick="toggleHint(this)">показать ответ</span>
@@ -286,7 +292,7 @@ function renderQuiz2() {
     card.className = 'card';
     card.innerHTML = `
       <div class="char" style="font-size: 16px;">${item.translation}</div>
-      <button class="speak-btn" onclick="speakChinese('${item.char}')" title="Произнести">🔊</button>
+      <button class="speak-btn" onclick="speakChinese('${item.char}')">🔊</button>
       <div class="card-body">
         <input type="text" placeholder="Введите пиньинь или иероглиф…" data-pinyin="${item.pinyin}" data-char="${item.char}">
         <span class="hint-link" onclick="toggleHint2(this)">показать ответ</span>
@@ -355,7 +361,7 @@ function renderQuiz5() {
     card.className = 'card';
     card.innerHTML = `
       <div class="char">${item.char}</div>
-      <button class="speak-btn" onclick="speakChinese('${item.char}')" title="Произнести">🔊</button>
+      <button class="speak-btn" onclick="speakChinese('${item.char}')">🔊</button>
       <div class="card-body">
         <input type="text" placeholder="Перевод на русский…" data-correct="${item.translation.replace(/"/g, '&quot;')}" data-pinyin="${item.pinyin || ''}">
         <span class="hint-link" onclick="toggleHint5(this)">показать ответ</span>
@@ -470,7 +476,7 @@ function renderDictResults(results) {
     div.className = 'dict-item';
     div.innerHTML = `
       <div class="dict-char">${item.char}</div>
-      <button class="speak-btn speak-btn-sm" onclick="speakChinese('${item.char}')" title="Произнести">🔊</button>
+      <button class="speak-btn-sm" onclick="speakChinese('${item.char}')">🔊</button>
       <div class="dict-info">
         <div class="dict-pinyin">${item.pinyin || '—'}</div>
         <div class="dict-translation">${item.translation}</div>
