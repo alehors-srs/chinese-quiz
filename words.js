@@ -734,7 +734,7 @@ window.dictionary = [
   {
     "char": "认识",
     "pinyin": "rènshi",
-    "translation": "нать, быть знакомым"
+    "translation": "знать, быть знакомым"
   },
   {
     "char": "高兴",
