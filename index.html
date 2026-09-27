@@ -108,6 +108,31 @@
   .test-restart-btn { background: #2ecc71; color: #fff; font-size: 18px; padding: 14px 40px; border: none; border-radius: 12px; cursor: pointer; transition: background 0.2s; }
   .test-restart-btn:hover { background: #27ae60; }
 
+
+  /* One-card quiz */
+  .quiz-card-wrap { max-width: 700px; margin: 0 auto; }
+  .quiz-progress-text { text-align: center; font-size: 14px; color: #95a5a6; margin-bottom: 10px; }
+  .next-btn { background: #2ecc71; color: #fff; }
+  .next-btn:hover { background: #27ae60; }
+
+  /* Results list */
+  .results-list { max-width: 700px; margin: 20px auto; }
+  .results-list h3 { text-align: center; margin-bottom: 16px; }
+  .result-row { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 10px; margin-bottom: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+  .result-row.ok { background: #eafaf1; border-left: 4px solid #27ae60; }
+  .result-row.err { background: #fdedec; border-left: 4px solid #e74c3c; }
+  .result-mark { font-size: 20px; font-weight: bold; }
+  .result-char { font-size: 28px; min-width: 60px; text-align: center; }
+  .result-pinyin { font-size: 15px; color: #3498db; font-weight: 600; min-width: 120px; }
+  .result-translation { font-size: 16px; color: #333; flex: 1; }
+  .result-user-answer { font-size: 14px; color: #e74c3c; }
+
+  /* Test word count selector */
+  .test-count-select { padding: 12px 20px; font-size: 18px; border: 2px solid #d0d5db; border-radius: 12px; outline: none; margin-bottom: 20px; cursor: pointer; }
+  .test-count-select:focus { border-color: #3498db; }
+  .test-restart-during { background: #e74c3c; color: #fff; font-size: 16px; padding: 10px 28px; border: none; border-radius: 10px; cursor: pointer; transition: background 0.2s; }
+  .test-restart-during:hover { background: #c0392b; }
+
 </style>
 <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
 </head>
@@ -115,31 +140,31 @@
 <h1>Тренировка иероглифов</h1>
 
 <div class="tabs">
-  <div class="tab active" data-tab="tab1">Иероглифы → Русский</div>
-  <div class="tab" data-tab="tab2">Русский → Иероглифы</div>
+  <div class="tab active" data-tab="tab1">字 - АБВ</div>
+  <div class="tab" data-tab="tab2">АБВ - 字</div>
   <div class="tab" data-tab="tab5">Последние 50</div>
   <div class="tab" data-tab="tab6">Словарь</div>
   <div class="tab" data-tab="tab7">Тест</div>
 </div>
 
-<!-- TAB 1: Иероглифы → Русский -->
+<!-- TAB 1: 字 - АБВ -->
 <div class="tab-content active" id="tab1">
   <p class="subtitle">Переведите 10 иероглифов на русский</p>
   <div id="result-banner"></div>
   <div id="quiz"></div>
   <div class="actions">
-    <button id="check-btn">Проверить</button>
+    <button id="next-btn" class="next-btn">Следующая</button>
     <button id="new-btn">Новый раунд</button>
   </div>
 </div>
 
-<!-- TAB 2: Русский → Иероглифы -->
+<!-- TAB 2: АБВ - 字 -->
 <div class="tab-content" id="tab2">
   <p class="subtitle">Переведите 10 русских слов на китайский</p>
   <div id="result-banner2"></div>
   <div id="quiz2"></div>
   <div class="actions">
-    <button class="check-btn" id="check-btn2">Проверить</button>
+    <button id="next-btn2" class="next-btn">Следующая</button>
     <button class="new-btn" id="new-btn2">Новый раунд</button>
   </div>
 </div>
@@ -150,7 +175,7 @@
   <div id="result-banner5"></div>
   <div id="quiz5"></div>
   <div class="actions">
-    <button class="check-btn" id="check-btn5">Проверить</button>
+    <button id="next-btn5" class="next-btn">Следующая</button>
     <button class="new-btn" id="new-btn5">Новый раунд</button>
   </div>
 </div>
@@ -169,7 +194,14 @@
 <div class="tab-content" id="tab7">
   <div id="test-start" class="test-start-screen">
     <h2>Тест на знание иероглифов</h2>
-    <p>10 вопросов с выбором перевода. Карточки переключаются автоматически.</p>
+    <p>Вопросы с выбором перевода. Карточки переключаются автоматически.</p>
+    <label style="display:block; margin-bottom:8px; font-size:16px; color:#7f8c8d;">Количество слов:</label>
+    <select class="test-count-select" id="test-count">
+      <option value="10">10 слов</option>
+      <option value="25">25 слов</option>
+      <option value="50">50 слов</option>
+    </select>
+    <br>
     <button class="test-btn" id="test-start-btn">Начать тест</button>
   </div>
   <div id="test-quiz" style="display:none;">
@@ -177,11 +209,22 @@
       <div class="test-progress-bar"><div class="test-progress-fill" id="test-progress-fill" style="width:0%"></div></div>
       <div class="test-progress-text" id="test-progress-text">Вопрос 1 из 10</div>
     </div>
+    <div style="text-align:center; margin-bottom:16px;">
+      <button class="test-restart-during" id="test-restart-during-btn">Начать сначала</button>
+    </div>
     <div class="test-card-wrap" id="test-card-container"></div>
   </div>
   <div id="test-result" class="test-result" style="display:none;">
     <div class="test-result-score" id="test-score"></div>
     <div class="test-result-msg" id="test-msg"></div>
+    <div class="results-list" id="test-results-list"></div>
+    <label style="display:block; margin-bottom:8px; font-size:16px; color:#7f8c8d;">Количество слов:</label>
+    <select class="test-count-select" id="test-count2">
+      <option value="10">10 слов</option>
+      <option value="25">25 слов</option>
+      <option value="50">50 слов</option>
+    </select>
+    <br>
     <button class="test-restart-btn" id="test-restart-btn">Начать тест заново</button>
   </div>
 </div>
@@ -267,37 +310,88 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
-// === TAB 1: Иероглифы → Русский ===
+// === TAB 1: 字 - АБВ ===
+
+let quiz1State = { items: [], idx: 0, results: [], answered: false };
 
 function renderQuiz() {
+  quiz1State.items = shuffle(dictionary).slice(0, Math.min(10, dictionary.length));
+  quiz1State.idx = 0;
+  quiz1State.results = [];
+  quiz1State.answered = false;
+  document.getElementById('result-banner').textContent = '';
+  document.getElementById('result-banner').className = '';
+  const tab1 = document.getElementById('tab1');
+  const rl1 = tab1.querySelector('.results-list');
+  if (rl1) rl1.remove();
+  renderQuizCard();
+}
+
+function renderQuizCard() {
   const quiz = document.getElementById('quiz');
   quiz.innerHTML = '';
-  document.getElementById('result-banner').textContent = '';
-  const selected = shuffle(dictionary).slice(0, Math.min(10, dictionary.length));
-  selected.forEach((item, i) => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <div class="char">${item.char}</div>
-      <button class="speak-btn" onclick="speakChinese('${item.char}')">🔊</button>
-      <div class="card-body">
-        <input type="text" placeholder="Перевод на русский…" data-correct="${item.translation.replace(/"/g, '&quot;')}" data-pinyin="${item.pinyin || ''}">
-        <span class="hint-link" onclick="toggleHint(this)">показать ответ</span>
-        <div class="hint">Пиньинь: ${item.pinyin || '—'} | Перевод: ${item.translation}</div>
-      </div>
-    `;
-    quiz.appendChild(card);
+  if (quiz1State.idx >= quiz1State.items.length) {
+    showQuizResults(quiz1State.results, document.getElementById('result-banner'));
+    return;
+  }
+  const item = quiz1State.items[quiz1State.idx];
+  const progress = document.createElement('div');
+  progress.className = 'quiz-progress-text';
+  progress.textContent = 'Слово ' + (quiz1State.idx + 1) + ' из ' + quiz1State.items.length;
+  quiz.appendChild(progress);
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.id = 'quiz-card-current';
+  card.innerHTML = `
+    <div class="char">${item.char}</div>
+    <button class="speak-btn" onclick="speakChinese('${item.char}')">🔊</button>
+    <div class="card-body">
+      <input type="text" placeholder="Перевод на русский…" id="quiz-input" data-correct="${item.translation.replace(/"/g, '&quot;')}" data-pinyin="${item.pinyin || ''}">
+      <span class="hint-link" onclick="toggleHint(this)">показать ответ</span>
+      <div class="hint">Пиньинь: ${item.pinyin || '—'} | Перевод: ${item.translation}</div>
+    </div>
+  `;
+  quiz.appendChild(card);
+  quiz1State.answered = false;
+  const inp = card.querySelector('input');
+  inp.focus();
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleQuiz1Next();
+    }
   });
-  const inputs = quiz.querySelectorAll('input');
-  inputs.forEach((inp, idx) => {
-    inp.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        if (idx < inputs.length - 1) inputs[idx + 1].focus();
-        else document.getElementById('check-btn').click();
-      }
-    });
-  });
+}
+
+function handleQuiz1Next() {
+  if (!quiz1State.answered) {
+    const card = document.getElementById('quiz-card-current');
+    const inp = card.querySelector('input');
+    if (!inp.value.trim()) {
+      const item = quiz1State.items[quiz1State.idx];
+      quiz1State.results.push({ char: item.char, pinyin: item.pinyin || '—', translation: item.translation, userAnswer: '(пусто)', correct: false });
+      card.classList.remove('correct', 'wrong');
+      card.classList.add('wrong');
+      quiz1State.answered = true;
+      quiz1State.idx++;
+      setTimeout(() => renderQuizCard(), 500);
+      return;
+    }
+    const item = quiz1State.items[quiz1State.idx];
+    const ok = checkAnswer(inp.value, inp.dataset.correct);
+    quiz1State.results.push({ char: item.char, pinyin: item.pinyin || '—', translation: item.translation, userAnswer: inp.value || '(пусто)', correct: ok });
+    card.classList.remove('correct', 'wrong');
+    card.classList.add(ok ? 'correct' : 'wrong');
+    quiz1State.answered = true;
+    if (ok) {
+      quiz1State.idx++;
+      setTimeout(() => renderQuizCard(), 500);
+    }
+  } else {
+    quiz1State.idx++;
+    renderQuizCard();
+  }
 }
 
 function toggleHint(link) {
@@ -306,61 +400,93 @@ function toggleHint(link) {
   link.textContent = hint.classList.contains('show') ? 'скрыть ответ' : 'показать ответ';
 }
 
-document.getElementById('check-btn').addEventListener('click', () => {
-  const cards = document.querySelectorAll('#quiz .card');
-  let count = 0;
-  cards.forEach(card => {
-    const input = card.querySelector('input');
-    const correct = input.dataset.correct;
-    const user = input.value;
-    const ok = checkAnswer(user, correct);
-    card.classList.remove('correct', 'wrong');
-    card.classList.add(ok ? 'correct' : 'wrong');
-    if (ok) count++;
-  });
-  const banner = document.getElementById('result-banner');
-  if (count === 10) { banner.textContent = 'Идеально! 10 из 10! 🎉'; banner.className = 'score-green'; }
-  else if (count >= 7) { banner.textContent = 'Хорошо! ' + count + ' из 10'; banner.className = 'score-orange'; }
-  else { banner.textContent = 'Нужно больше практики — ' + count + ' из 10'; banner.className = 'score-red'; }
-});
-
-document.getElementById('new-btn').addEventListener('click', () => {
-  renderQuiz();
-});
+document.getElementById('next-btn').addEventListener('click', handleQuiz1Next);
+document.getElementById('new-btn').addEventListener('click', renderQuiz);
 
 renderQuiz();
 
-// === TAB 2: Русский → Иероглифы ===
+// === TAB 2: АБВ - 字 ===
+
+let quiz2State = { items: [], idx: 0, results: [], answered: false };
 
 function renderQuiz2() {
+  quiz2State.items = shuffle(dictionary).slice(0, Math.min(10, dictionary.length));
+  quiz2State.idx = 0;
+  quiz2State.results = [];
+  quiz2State.answered = false;
+  document.getElementById('result-banner2').textContent = '';
+  document.getElementById('result-banner2').className = '';
+  const tab2 = document.getElementById('tab2');
+  const rl2 = tab2.querySelector('.results-list');
+  if (rl2) rl2.remove();
+  renderQuiz2Card();
+}
+
+function renderQuiz2Card() {
   const quiz = document.getElementById('quiz2');
   quiz.innerHTML = '';
-  document.getElementById('result-banner2').textContent = '';
-  const selected = shuffle(dictionary).slice(0, Math.min(10, dictionary.length));
-  selected.forEach((item, i) => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <div class="char" style="font-size: 16px;">${item.translation}</div>
-      <button class="speak-btn" onclick="speakChinese('${item.char}')">🔊</button>
-      <div class="card-body">
-        <input type="text" placeholder="Введите пиньинь или иероглиф…" data-pinyin="${item.pinyin}" data-char="${item.char}">
-        <span class="hint-link" onclick="toggleHint2(this)">показать ответ</span>
-        <div class="hint">Пиньинь: ${item.pinyin} | Иероглиф: ${item.char}</div>
-      </div>
-    `;
-    quiz.appendChild(card);
+  if (quiz2State.idx >= quiz2State.items.length) {
+    showQuizResults(quiz2State.results, document.getElementById('result-banner2'));
+    return;
+  }
+  const item = quiz2State.items[quiz2State.idx];
+  const progress = document.createElement('div');
+  progress.className = 'quiz-progress-text';
+  progress.textContent = 'Слово ' + (quiz2State.idx + 1) + ' из ' + quiz2State.items.length;
+  quiz.appendChild(progress);
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.id = 'quiz2-card-current';
+  card.innerHTML = `
+    <div class="char" style="font-size: 16px;">${item.translation}</div>
+    <button class="speak-btn" onclick="speakChinese('${item.char}')">🔊</button>
+    <div class="card-body">
+      <input type="text" placeholder="Введите пиньинь или иероглиф…" id="quiz2-input" data-pinyin="${item.pinyin}" data-char="${item.char}">
+      <span class="hint-link" onclick="toggleHint2(this)">показать ответ</span>
+      <div class="hint">Пиньинь: ${item.pinyin} | Иероглиф: ${item.char}</div>
+    </div>
+  `;
+  quiz.appendChild(card);
+  quiz2State.answered = false;
+  const inp = card.querySelector('input');
+  inp.focus();
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleQuiz2Next();
+    }
   });
-  const inputs = quiz.querySelectorAll('#quiz2 input');
-  inputs.forEach((inp, idx) => {
-    inp.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        if (idx < inputs.length - 1) inputs[idx + 1].focus();
-        else document.getElementById('check-btn2').click();
-      }
-    });
-  });
+}
+
+function handleQuiz2Next() {
+  if (!quiz2State.answered) {
+    const card = document.getElementById('quiz2-card-current');
+    const inp = card.querySelector('input');
+    if (!inp.value.trim()) {
+      const item = quiz2State.items[quiz2State.idx];
+      quiz2State.results.push({ char: item.char, pinyin: item.pinyin, translation: item.translation, userAnswer: '(пусто)', correct: false });
+      card.classList.remove('correct', 'wrong');
+      card.classList.add('wrong');
+      quiz2State.answered = true;
+      quiz2State.idx++;
+      setTimeout(() => renderQuiz2Card(), 500);
+      return;
+    }
+    const item = quiz2State.items[quiz2State.idx];
+    const ok = checkPinyin(inp.value, inp.dataset.pinyin) || inp.value.trim() === item.char;
+    quiz2State.results.push({ char: item.char, pinyin: item.pinyin, translation: item.translation, userAnswer: inp.value || '(пусто)', correct: ok });
+    card.classList.remove('correct', 'wrong');
+    card.classList.add(ok ? 'correct' : 'wrong');
+    quiz2State.answered = true;
+    if (ok) {
+      quiz2State.idx++;
+      setTimeout(() => renderQuiz2Card(), 500);
+    }
+  } else {
+    quiz2State.idx++;
+    renderQuiz2Card();
+  }
 }
 
 function toggleHint2(link) {
@@ -369,67 +495,98 @@ function toggleHint2(link) {
   link.textContent = hint.classList.contains('show') ? 'скрыть ответ' : 'показать ответ';
 }
 
-document.getElementById('check-btn2').addEventListener('click', () => {
-  const cards = document.querySelectorAll('#quiz2 .card');
-  let count = 0;
-  cards.forEach(card => {
-    const input = card.querySelector('input');
-    const correct = input.dataset.pinyin;
-    const char = input.dataset.char;
-    const user = input.value;
-    const ok = checkPinyin(user, correct) || user.trim() === char;
-    card.classList.remove('correct', 'wrong');
-    card.classList.add(ok ? 'correct' : 'wrong');
-    if (ok) count++;
-  });
-  const banner = document.getElementById('result-banner2');
-  if (count === 10) { banner.textContent = 'Идеально! 10 из 10! 🎉'; banner.className = 'score-green'; }
-  else if (count >= 7) { banner.textContent = 'Хорошо! ' + count + ' из 10'; banner.className = 'score-orange'; }
-  else { banner.textContent = 'Нужно больше практики — ' + count + ' из 10'; banner.className = 'score-red'; }
-});
-
-document.getElementById('new-btn2').addEventListener('click', () => {
-  renderQuiz2();
-});
+document.getElementById('next-btn2').addEventListener('click', handleQuiz2Next);
+document.getElementById('new-btn2').addEventListener('click', renderQuiz2);
 
 renderQuiz2();
 
 // === TAB 5: Последние 50 ===
+
+let quiz5State = { items: [], idx: 0, results: [], answered: false };
 
 function getLast50() {
   return dictionary.slice(-50);
 }
 
 function renderQuiz5() {
+  const pool = getLast50();
+  quiz5State.items = shuffle(pool).slice(0, Math.min(10, pool.length));
+  quiz5State.idx = 0;
+  quiz5State.results = [];
+  quiz5State.answered = false;
+  document.getElementById('result-banner5').textContent = '';
+  document.getElementById('result-banner5').className = '';
+  const tab5 = document.getElementById('tab5');
+  const rl5 = tab5.querySelector('.results-list');
+  if (rl5) rl5.remove();
+  renderQuiz5Card();
+}
+
+function renderQuiz5Card() {
   const quiz = document.getElementById('quiz5');
   quiz.innerHTML = '';
-  document.getElementById('result-banner5').textContent = '';
-  const pool = getLast50();
-  const selected = shuffle(pool).slice(0, Math.min(10, pool.length));
-  selected.forEach((item, i) => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <div class="char">${item.char}</div>
-      <button class="speak-btn" onclick="speakChinese('${item.char}')">🔊</button>
-      <div class="card-body">
-        <input type="text" placeholder="Перевод на русский…" data-correct="${item.translation.replace(/"/g, '&quot;')}" data-pinyin="${item.pinyin || ''}">
-        <span class="hint-link" onclick="toggleHint5(this)">показать ответ</span>
-        <div class="hint">Пиньинь: ${item.pinyin || '—'} | Перевод: ${item.translation}</div>
-      </div>
-    `;
-    quiz.appendChild(card);
+  if (quiz5State.idx >= quiz5State.items.length) {
+    showQuizResults(quiz5State.results, document.getElementById('result-banner5'));
+    return;
+  }
+  const item = quiz5State.items[quiz5State.idx];
+  const progress = document.createElement('div');
+  progress.className = 'quiz-progress-text';
+  progress.textContent = 'Слово ' + (quiz5State.idx + 1) + ' из ' + quiz5State.items.length;
+  quiz.appendChild(progress);
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.id = 'quiz5-card-current';
+  card.innerHTML = `
+    <div class="char">${item.char}</div>
+    <button class="speak-btn" onclick="speakChinese('${item.char}')">🔊</button>
+    <div class="card-body">
+      <input type="text" placeholder="Перевод на русский…" id="quiz5-input" data-correct="${item.translation.replace(/"/g, '&quot;')}" data-pinyin="${item.pinyin || ''}">
+      <span class="hint-link" onclick="toggleHint5(this)">показать ответ</span>
+      <div class="hint">Пиньинь: ${item.pinyin || '—'} | Перевод: ${item.translation}</div>
+    </div>
+  `;
+  quiz.appendChild(card);
+  quiz5State.answered = false;
+  const inp = card.querySelector('input');
+  inp.focus();
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleQuiz5Next();
+    }
   });
-  const inputs = quiz.querySelectorAll('#quiz5 input');
-  inputs.forEach((inp, idx) => {
-    inp.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        if (idx < inputs.length - 1) inputs[idx + 1].focus();
-        else document.getElementById('check-btn5').click();
-      }
-    });
-  });
+}
+
+function handleQuiz5Next() {
+  if (!quiz5State.answered) {
+    const card = document.getElementById('quiz5-card-current');
+    const inp = card.querySelector('input');
+    if (!inp.value.trim()) {
+      const item = quiz5State.items[quiz5State.idx];
+      quiz5State.results.push({ char: item.char, pinyin: item.pinyin || '—', translation: item.translation, userAnswer: '(пусто)', correct: false });
+      card.classList.remove('correct', 'wrong');
+      card.classList.add('wrong');
+      quiz5State.answered = true;
+      quiz5State.idx++;
+      setTimeout(() => renderQuiz5Card(), 500);
+      return;
+    }
+    const item = quiz5State.items[quiz5State.idx];
+    const ok = checkAnswer(inp.value, inp.dataset.correct);
+    quiz5State.results.push({ char: item.char, pinyin: item.pinyin || '—', translation: item.translation, userAnswer: inp.value || '(пусто)', correct: ok });
+    card.classList.remove('correct', 'wrong');
+    card.classList.add(ok ? 'correct' : 'wrong');
+    quiz5State.answered = true;
+    if (ok) {
+      quiz5State.idx++;
+      setTimeout(() => renderQuiz5Card(), 500);
+    }
+  } else {
+    quiz5State.idx++;
+    renderQuiz5Card();
+  }
 }
 
 function toggleHint5(link) {
@@ -438,30 +595,40 @@ function toggleHint5(link) {
   link.textContent = hint.classList.contains('show') ? 'скрыть ответ' : 'показать ответ';
 }
 
-document.getElementById('check-btn5').addEventListener('click', () => {
-  const cards = document.querySelectorAll('#quiz5 .card');
-  let count = 0;
-  const total = cards.length;
-  cards.forEach(card => {
-    const input = card.querySelector('input');
-    const correct = input.dataset.correct;
-    const user = input.value;
-    const ok = checkAnswer(user, correct);
-    card.classList.remove('correct', 'wrong');
-    card.classList.add(ok ? 'correct' : 'wrong');
-    if (ok) count++;
-  });
-  const banner = document.getElementById('result-banner5');
-  if (count === total) { banner.textContent = 'Идеально! ' + count + ' из ' + total + '! 🎉'; banner.className = 'score-green'; }
-  else if (count >= Math.ceil(total * 0.7)) { banner.textContent = 'Хорошо! ' + count + ' из ' + total; banner.className = 'score-orange'; }
-  else { banner.textContent = 'Нужно больше практики — ' + count + ' из ' + total; banner.className = 'score-red'; }
-});
-
-document.getElementById('new-btn5').addEventListener('click', () => {
-  renderQuiz5();
-});
+document.getElementById('next-btn5').addEventListener('click', handleQuiz5Next);
+document.getElementById('new-btn5').addEventListener('click', renderQuiz5);
 
 renderQuiz5();
+
+// === SHARED: Results list ===
+
+function showQuizResults(results, banner) {
+  const container = banner.parentElement;
+  let existing = container.querySelector('.results-list');
+  if (existing) existing.remove();
+
+  const correctCount = results.filter(r => r.correct).length;
+  const total = results.length;
+  if (correctCount === total) { banner.textContent = 'Идеально! ' + correctCount + ' из ' + total + '! 🎉'; banner.className = 'score-green'; }
+  else if (correctCount >= Math.ceil(total * 0.7)) { banner.textContent = 'Хорошо! ' + correctCount + ' из ' + total; banner.className = 'score-orange'; }
+  else { banner.textContent = 'Нужно больше практики — ' + correctCount + ' из ' + total; banner.className = 'score-red'; }
+
+  const list = document.createElement('div');
+  list.className = 'results-list';
+  results.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'result-row ' + (r.correct ? 'ok' : 'err');
+    row.innerHTML = `
+      <div class="result-mark">${r.correct ? '✓' : '✗'}</div>
+      <div class="result-char">${r.char}</div>
+      <div class="result-pinyin">${r.pinyin}</div>
+      <div class="result-translation">${r.translation}</div>
+      ${r.correct ? '' : '<div class="result-user-answer">Ваш ответ: ' + r.userAnswer + '</div>'}
+    `;
+    list.appendChild(row);
+  });
+  container.appendChild(list);
+}
 
 // === TAB 6: Словарь ===
 
@@ -549,12 +716,16 @@ renderDictResults(dictionary);
 let testQuestions = [];
 let testCurrentIdx = 0;
 let testScore = 0;
+let testCount = 10;
 
 function startTest() {
-  testQuestions = shuffle(dictionary).slice(0, Math.min(10, dictionary.length)).map(item => {
+  const sel = document.getElementById('test-count');
+  const sel2 = document.getElementById('test-count2');
+  testCount = parseInt(sel ? sel.value : (sel2 ? sel2.value : 10));
+  testQuestions = shuffle(dictionary).slice(0, Math.min(testCount, dictionary.length)).map(item => {
     const distractors = shuffle(dictionary.filter(d => d.translation !== item.translation)).slice(0, 3);
     const options = shuffle([item, ...distractors]).map(d => d.translation);
-    return { char: item.char, correct: item.translation, options: options };
+    return { char: item.char, pinyin: item.pinyin || '—', correct: item.translation, options: options, userAnswer: null, isCorrect: false };
   });
   testCurrentIdx = 0;
   testScore = 0;
@@ -562,6 +733,14 @@ function startTest() {
   document.getElementById('test-result').style.display = 'none';
   document.getElementById('test-quiz').style.display = 'block';
   renderTestQuestion();
+}
+
+function restartTest() {
+  document.getElementById('test-quiz').style.display = 'none';
+  document.getElementById('test-result').style.display = 'none';
+  document.getElementById('test-start').style.display = 'block';
+  const listEl = document.getElementById('test-results-list');
+  if (listEl) listEl.innerHTML = '';
 }
 
 function renderTestQuestion() {
@@ -585,7 +764,7 @@ function renderTestQuestion() {
     const btn = document.createElement('div');
     btn.className = 'test-option';
     btn.textContent = opt;
-    btn.addEventListener('click', () => handleTestAnswer(btn, opt, q.correct));
+    btn.addEventListener('click', () => handleTestAnswer(btn, opt, q));
     optionsDiv.appendChild(btn);
   });
 
@@ -593,16 +772,19 @@ function renderTestQuestion() {
   container.appendChild(card);
 }
 
-function handleTestAnswer(btn, selected, correct) {
+function handleTestAnswer(btn, selected, q) {
   const allOptions = btn.parentElement.querySelectorAll('.test-option');
   allOptions.forEach(o => o.classList.add('disabled'));
 
-  if (selected === correct) {
+  q.userAnswer = selected;
+  if (selected === q.correct) {
     btn.classList.add('correct');
+    q.isCorrect = true;
     testScore++;
   } else {
     btn.classList.add('wrong');
-    allOptions.forEach(o => { if (o.textContent === correct) o.classList.add('correct'); });
+    q.isCorrect = false;
+    allOptions.forEach(o => { if (o.textContent === q.correct) o.classList.add('correct'); });
   }
 
   setTimeout(() => {
@@ -620,6 +802,7 @@ function showTestResult() {
   const resultDiv = document.getElementById('test-result');
   const scoreDiv = document.getElementById('test-score');
   const msgDiv = document.getElementById('test-msg');
+  const listDiv = document.getElementById('test-results-list');
   const total = testQuestions.length;
 
   scoreDiv.textContent = testScore + ' / ' + total;
@@ -627,11 +810,29 @@ function showTestResult() {
   else if (testScore >= Math.ceil(total * 0.7)) { scoreDiv.className = 'test-result-score score-orange'; msgDiv.textContent = 'Хороший результат!'; }
   else { scoreDiv.className = 'test-result-score score-red'; msgDiv.textContent = 'Нужно больше практики'; }
 
+  listDiv.innerHTML = '';
+  testQuestions.forEach(q => {
+    const row = document.createElement('div');
+    row.className = 'result-row ' + (q.isCorrect ? 'ok' : 'err');
+    row.innerHTML = `
+      <div class="result-mark">${q.isCorrect ? '✓' : '✗'}</div>
+      <div class="result-char">${q.char}</div>
+      <div class="result-pinyin">${q.pinyin}</div>
+      <div class="result-translation">${q.correct}</div>
+      ${q.isCorrect ? '' : '<div class="result-user-answer">Ваш ответ: ' + q.userAnswer + '</div>'}
+    `;
+    listDiv.appendChild(row);
+  });
+
+  const sel2 = document.getElementById('test-count2');
+  if (sel2) sel2.value = String(testCount);
+
   resultDiv.style.display = 'block';
 }
 
 document.getElementById('test-start-btn').addEventListener('click', startTest);
 document.getElementById('test-restart-btn').addEventListener('click', startTest);
+document.getElementById('test-restart-during-btn').addEventListener('click', restartTest);
 
 </script>
 </body>

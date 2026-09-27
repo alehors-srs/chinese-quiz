@@ -67,6 +67,11 @@ window.dictionary = [
     "translation": "шесть, 6"
   },
   {
+    "char": "一",
+    "pinyin": "yī",
+    "translation": "один, 1"
+  },
+  {
     "char": "您",
     "pinyin": "nín",
     "translation": "Вы"
@@ -105,6 +110,26 @@ window.dictionary = [
     "char": "叫",
     "pinyin": "Jiào",
     "translation": "звать, зовут"
+  },
+  {
+    "char": "三",
+    "pinyin": "sān",
+    "translation": "три, 3"
+  },
+  {
+    "char": "八",
+    "pinyin": "bā",
+    "translation": "восемь, 8"
+  },
+  {
+    "char": "十",
+    "pinyin": "shí",
+    "translation": "десять, 10"
+  },
+  {
+    "char": "二",
+    "pinyin": "èr",
+    "translation": "два, 2"
   },
   {
     "char": "什么",
@@ -180,11 +205,6 @@ window.dictionary = [
     "char": "她",
     "pinyin": "tā",
     "translation": "она"
-  },
-  {
-    "char": "李月",
-    "pinyin": "Lǐ Yuè",
-    "translation": "Ли Юэ, имя"
   },
   {
     "char": "这",
@@ -434,7 +454,7 @@ window.dictionary = [
   {
     "char": "本",
     "pinyin": "běn",
-    "translation": "счетное слово"
+    "translation": "счетное слово, для корешков"
   },
   {
     "char": "昨天",
@@ -554,7 +574,7 @@ window.dictionary = [
   {
     "char": "好喝",
     "pinyin": "hǎohē",
-    "translation": "вкусный о напитках"
+    "translation": "вкусный, о напитках"
   },
   {
     "char": "茶",
@@ -599,7 +619,7 @@ window.dictionary = [
   {
     "char": "杯",
     "pinyin": "bēi",
-    "translation": "счетное слово для стаканов"
+    "translation": "счетное слово, для стаканов"
   },
   {
     "char": "多少",
@@ -862,58 +882,8 @@ window.dictionary = [
     "translation": "ресторан"
   },
   {
-    "char": "白家月",
-    "pinyin": "bái jiā yuè",
-    "translation": "Ба дзя юэ, имя"
-  },
-  {
-    "char": "李文",
-    "pinyin": "lǐ wén",
-    "translation": "Ли вэн, имя"
-  },
-  {
-    "char": "陈天中",
-    "pinyin": "chén tiān zhōng",
-    "translation": "Чхэн тьен джон, имя"
-  },
-  {
-    "char": "安妮",
-    "pinyin": "ānnī",
-    "translation": "Ан ни, имя"
-  },
-  {
-    "char": "小语",
-    "pinyin": "xiǎo yǔ",
-    "translation": "сяо йю, имя"
-  },
-  {
-    "char": "王一飞",
-    "pinyin": "wáng yī fēi",
-    "translation": "Ван йи фей, имя"
-  },
-  {
-    "char": "刘明",
-    "pinyin": "Liú Míng",
-    "translation": "Лиу Мин, имя"
-  },
-  {
-    "char": "王一雪",
-    "pinyin": "Wáng yī xuě",
-    "translation": "Ван йи сюе, имя"
-  },
-  {
-    "char": "家月",
-    "pinyin": "jiā yuè",
-    "translation": "дзя юэ, имя"
-  },
-  {
-    "char": "杨同乐",
-    "pinyin": "Yáng tōng lè",
-    "translation": "Йан тхон лэ, имя"
-  },
-  {
-    "char": "胡",
-    "pinyin": "Hú",
-    "translation": "Ху, имя"
+    "char": "幺",
+    "pinyin": "yāo",
+    "translation": "один, 1, в номере телефона"
   }
 ];
