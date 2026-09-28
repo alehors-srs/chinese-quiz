@@ -11,7 +11,15 @@
 <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #333; min-height: 100vh; padding: 20px; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; 
+      margin: 0;
+      min-height: 100vh;           /* чтобы фон был на всю высоту экрана */
+      background-color: #f0f4f8;   /* запасной цвет, если картинка не загрузится */
+      background-image: url("images/background.jpg");
+      background-position: center; /* центрируем картинку */
+      background-size: cover;      /* заполняем область, обрезая лишнее */
+      background-repeat: no-repeat;/* не повторяем */
+     }
   h1 { text-align: center; color: #2c3e50; margin-bottom: 8px; }
   .subtitle { text-align: center; color: #7f8c8d; margin-bottom: 20px; font-size: 14px; }
   .stats { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
