@@ -8,6 +8,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon_32.png">
 <link rel="icon" type="image/ico" sizes="48x48" href="images/favicon_48.ico">
 <link rel="icon" type="image/png" sizes="512x512" href="images/favicon_512.png">
+<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #333; min-height: 100vh; padding: 20px; }
@@ -150,7 +151,7 @@
 <div class="tabs">
   <div class="tab active" data-tab="tab1">字 - АБВ</div>
   <div class="tab" data-tab="tab2">АБВ - 字</div>
-  <div class="tab" data-tab="tab5">Последние 50</div>
+  <div class="tab" data-tab="tab5">Последние</div>
   <div class="tab" data-tab="tab6">Словарь</div>
   <div class="tab" data-tab="tab8">Имена</div>
   <div class="tab" data-tab="tab7">Тест</div>
@@ -178,9 +179,18 @@
   </div>
 </div>
 
-<!-- TAB 5: Последние 50 -->
+<!-- TAB 5: Последние -->
 <div class="tab-content" id="tab5">
-  <p class="subtitle">Переведите 10 иероглифов из последних 50 на русский язык</p>
+  <div style="text-align:center; margin-bottom:16px;">
+    <label style="display:block; margin-bottom:8px; font-size:16px; color:#7f8c8d;">Количество слов:</label>
+    <select class="test-count-select" id="last-count">
+      <option value="25">25 слов</option>
+      <option value="50" selected>50 слов</option>
+      <option value="75">75 слов</option>
+      <option value="100">100 слов</option>
+    </select>
+  </div>
+  <p class="subtitle" id="tab5-subtitle">Переведите 10 иероглифов из последних 50 на русский язык</p>
   <div id="result-banner5"></div>
   <div id="quiz5"></div>
   <div class="actions">
@@ -523,16 +533,22 @@ document.getElementById('new-btn2').addEventListener('click', renderQuiz2);
 
 renderQuiz2();
 
-// === TAB 5: Последние 50 ===
+// === TAB 5: Последние ===
 
 let quiz5State = { items: [], idx: 0, results: [], answered: false };
+let lastCount = 50;
 
-function getLast50() {
-  return dictionary.slice(-50);
+function getLastWords() {
+  return dictionary.slice(-lastCount);
+}
+
+function updateTab5Subtitle() {
+  const sub = document.getElementById('tab5-subtitle');
+  if (sub) sub.textContent = 'Переведите 10 иероглифов из последних ' + lastCount + ' на русский язык';
 }
 
 function renderQuiz5() {
-  const pool = getLast50();
+  const pool = getLastWords();
   quiz5State.items = shuffle(pool).slice(0, Math.min(10, pool.length));
   quiz5State.idx = 0;
   quiz5State.results = [];
@@ -622,6 +638,15 @@ function toggleHint5(link) {
 
 document.getElementById('next-btn5').addEventListener('click', handleQuiz5Next);
 document.getElementById('new-btn5').addEventListener('click', renderQuiz5);
+
+const lastCountSelect = document.getElementById('last-count');
+if (lastCountSelect) {
+  lastCountSelect.addEventListener('change', () => {
+    lastCount = parseInt(lastCountSelect.value);
+    updateTab5Subtitle();
+    renderQuiz5();
+  });
+}
 
 renderQuiz5();
 
