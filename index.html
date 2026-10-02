@@ -269,8 +269,8 @@
           <button id="add-confirm-btn" class="add-confirm-btn">Добавить в словарь</button>
           <button id="add-cancel-btn" class="add-cancel-btn">Отмена</button>
         </div>
-        <div id="add-status" class="add-status"></div>
       </div>
+      <div id="add-status" class="add-status"></div>
     </div>
   </div>
 
@@ -955,6 +955,15 @@ async function confirmAddWord() {
   if (!charVal) { addStatus.textContent = 'Введите иероглиф'; addStatus.className = 'add-status error'; return; }
   if (!pinyinVal) { addStatus.textContent = 'Введите пиньинь'; addStatus.className = 'add-status error'; return; }
   if (!translationVal) { addStatus.textContent = 'Введите перевод'; addStatus.className = 'add-status error'; return; }
+
+  // Проверка на дубликат
+  const existingWord = dictionary.find(d => d.char === charVal);
+  if (existingWord) {
+    addStatus.textContent = 'Это слово уже есть в словаре: ' + existingWord.pinyin + ' — ' + existingWord.translation;
+    addStatus.className = 'add-status error';
+    addPreview.style.display = 'none';
+    return;
+  }
 
   addConfirmBtn.disabled = true;
   addConfirmBtn.textContent = 'Добавляю…';
