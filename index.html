@@ -352,6 +352,38 @@ if (!window.dictionary) {
 
 const dictionary = window.dictionary;
 
+// Сравниваем записи независимо от регистра, лишних пробелов и формы Unicode.
+function normalizeWordField(value) {
+  return String(value ?? '')
+    .normalize('NFC')
+    // Удаляем невидимые символы Unicode
+    .replace(/[\u200B-\u200D\u2060\uFEFF\u00AD]/g, '')
+    // Приводим пробелы к единому виду
+    .replace(/\s+/g, ' ')
+    .trim()
+    // Игнорируем регистр
+    .toLowerCase();
+}
+
+// В словаре встречается старое написание тона breve (nĭ),
+// а pinyin-pro может вернуть caron (nǐ). Для сравнения это один тон.
+function normalizeWordPinyin(value) {
+  return normalizeWordField(value)
+    .replace(/ă/g, 'ǎ')
+    .replace(/ĕ/g, 'ě')
+    .replace(/ĭ/g, 'ǐ')
+    .replace(/ŏ/g, 'ǒ')
+    .replace(/ŭ/g, 'ǔ')
+    .normalize('NFC');
+}
+
+function isExactWordMatch(a, b) {
+  return !!a && !!b &&
+    normalizeWordField(a.char) === normalizeWordField(b.char) &&
+    normalizeWordPinyin(a.pinyin) === normalizeWordPinyin(b.pinyin) &&
+    normalizeWordField(a.translation) === normalizeWordField(b.translation);
+}
+
 // === RESPONSIVEVOICE TTS ===
 function speakChinese(text) {
   if (typeof responsiveVoice !== 'undefined') {
@@ -897,14 +929,7 @@ async function lookupWord() {
   addCharOptions.innerHTML = '';
 
   if (isChineseInput) {
-    // Chinese input — original flow
-    const existing = dictionary.find(d => d.char === charVal);
-    if (existing) {
-      addStatus.textContent = 'Это слово уже есть в словаре: ' + existing.pinyin + ' — ' + existing.translation;
-      addStatus.className = 'add-status error';
-      addPreview.style.display = 'none';
-      return;
-    }
+    // Проверяем полное совпадение только после заполнения пиньиня и перевода.
 
     addLookupBtn.disabled = true;
     addLookupBtn.textContent = 'Определяю…';
@@ -999,8 +1024,8 @@ async function lookupWord() {
       }
     }
 
-    // Filter out candidates already in dictionary
-    const newCandidates = candidates.filter(c => !dictionary.find(d => d.char === c));
+    // Сохраняем варианты с существующим иероглифом: перевод может отличаться.
+    const newCandidates = candidates;
 
     if (newCandidates.length === 0) {
       if (candidates.length > 0) {
@@ -1088,12 +1113,13 @@ async function confirmAddWord() {
   if (!pinyinVal) { addStatus.textContent = 'Введите пиньинь'; addStatus.className = 'add-status error'; return; }
   if (!translationVal) { addStatus.textContent = 'Введите перевод'; addStatus.className = 'add-status error'; return; }
 
-  // Проверка на дубликат
-  const existingWord = dictionary.find(d => d.char === charVal);
+  // Проверка полного совпадения по иероглифам, пиньиню и переводу
+  const candidateWord = { char: charVal, pinyin: pinyinVal, translation: translationVal };
+  const existingWord = dictionary.find(d => isExactWordMatch(d, candidateWord));
   if (existingWord) {
     addStatus.textContent = 'Это слово уже есть в словаре: ' + existingWord.pinyin + ' — ' + existingWord.translation;
     addStatus.className = 'add-status error';
-    addPreview.style.display = 'none';
+    // Не закрываем форму: можно уточнить перевод или пиньинь.
     return;
   }
 
@@ -1122,15 +1148,23 @@ async function confirmAddWord() {
     console.log('Server save error:', e);
   }
 
-  // Add to local dictionary regardless (so it's immediately usable)
-  dictionary.push({ char: charVal, pinyin: pinyinVal, translation: translationVal });
+  // Добавляем запись в рабочий словарь независимо от состояния сервера.
+  dictionary.push(candidateWord);
 
-  // Save to localStorage as backup
+  // Держим локальную копию до появления записи в обновлённом words.js.
   try {
-    let localWords = JSON.parse(localStorage.getItem('chinese-quiz_custom_words') || '[]');
-    localWords.push({ char: charVal, pinyin: pinyinVal, translation: translationVal });
-    localStorage.setItem('chinese-quiz_custom_words', JSON.stringify(localWords));
-  } catch (e) {}
+    const storageKey = 'Chinese-quiz_custom_words';
+    const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    const localWords = Array.isArray(stored) ? stored : [];
+
+    if (!localWords.some(w => isExactWordMatch(w, candidateWord))) {
+      localWords.push(candidateWord);
+    }
+
+    localStorage.setItem(storageKey, JSON.stringify(localWords));
+  } catch (e) {
+    console.error('Ошибка сохранения слова:', e);
+  }
 
   // Refresh dictionary display
   const currentSearch = document.getElementById('dict-search').value;
@@ -1158,18 +1192,63 @@ async function confirmAddWord() {
   }, 2500);
 }
 
-// On page load, merge any localStorage custom words into dictionary
+// On page load, remove exact duplicates from localStorage and merge remaining custom words.
 (function loadCustomWords() {
+  const storageKey = 'Chinese-quiz_custom_words';
+
   try {
-    const localWords = JSON.parse(localStorage.getItem('chinese-quiz_custom_words') || '[]');
-    localWords.forEach(w => {
-      if (!dictionary.find(d => d.char === w.char)) {
-        dictionary.push(w);
+    const storedWords = JSON.parse(
+      localStorage.getItem(storageKey) || '[]'
+    );
+
+    if (!Array.isArray(storedWords)) {
+      console.warn('Неверный формат словаря localStorage');
+      return;
+    }
+
+    const localWords = [];
+    let removed = 0;
+
+    for (const word of storedWords) {
+      if (
+        !word ||
+        typeof word.char !== 'string' ||
+        typeof word.pinyin !== 'string' ||
+        typeof word.translation !== 'string' ||
+        !word.char.trim() ||
+        !word.pinyin.trim() ||
+        !word.translation.trim()
+      ) {
+        removed++;
+        continue;
       }
-    });
-    // Refresh display
+
+      // dictionary уже содержит words.js и ранее принятые локальные слова.
+      const duplicate = dictionary.some(d =>
+        isExactWordMatch(d, word)
+      );
+
+      if (duplicate) {
+        removed++;
+        continue;
+      }
+
+      localWords.push(word);
+      dictionary.push(word);
+    }
+
+    localStorage.setItem(storageKey, JSON.stringify(localWords));
+
+    console.log(
+      'Chinese-quiz: локальный словарь очищен.',
+      'Удалено:', removed,
+      'Осталось:', localWords.length
+    );
+
     renderDictResults(dictionary);
-  } catch (e) {}
+  } catch (e) {
+    console.error('Ошибка очистки localStorage:', e);
+  }
 })();
 
 
