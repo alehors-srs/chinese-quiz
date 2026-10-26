@@ -1100,5 +1100,220 @@ window.dictionary = [
     "char": "冰淇淋",
     "pinyin": "bīng qí lín",
     "translation": "мороженое"
+  },
+  {
+    "char": "熊猫",
+    "pinyin": "xióngmāo",
+    "translation": "панда"
+  },
+  {
+    "char": "熊",
+    "pinyin": "xióng",
+    "translation": "медведь"
+  },
+  {
+    "char": "公司",
+    "pinyin": "gōngsī",
+    "translation": "организация, компания"
+  },
+  {
+    "char": "衣服",
+    "pinyin": "yīfu",
+    "translation": "одежда"
+  },
+  {
+    "char": "鸟",
+    "pinyin": "niǎo",
+    "translation": "птица"
+  },
+  {
+    "char": "次",
+    "pinyin": "cì",
+    "translation": "раз, о повторении"
+  },
+  {
+    "char": "票",
+    "pinyin": "piào",
+    "translation": "билет"
+  },
+  {
+    "char": "台",
+    "pinyin": "tái",
+    "translation": "сч. слово для электроники"
+  },
+  {
+    "char": "音乐会",
+    "pinyin": "yīnyuèhuì",
+    "translation": "концерт"
+  },
+  {
+    "char": "但是",
+    "pinyin": "dànshì",
+    "translation": "но, однако"
+  },
+  {
+    "char": "听歌",
+    "pinyin": "tīnggē",
+    "translation": "слушать песни, музыку"
+  },
+  {
+    "char": "小时",
+    "pinyin": "xiǎoshí",
+    "translation": "час, (длительность)"
+  },
+  {
+    "char": "白天",
+    "pinyin": "báitiān",
+    "translation": "дневное время"
+  },
+  {
+    "char": "第",
+    "pinyin": "dì",
+    "translation": "показатель порядкового числителя"
+  },
+  {
+    "char": "读书",
+    "pinyin": "dúshū",
+    "translation": "читать, (книгу)"
+  },
+  {
+    "char": "唱",
+    "pinyin": "chàng",
+    "translation": "петь"
+  },
+  {
+    "char": "歌",
+    "pinyin": "gē",
+    "translation": "песня"
+  },
+  {
+    "char": "好听",
+    "pinyin": "hǎotīng",
+    "translation": "приятный на слух"
+  },
+  {
+    "char": "电视",
+    "pinyin": "diànshì",
+    "translation": "телевидение, телевизор"
+  },
+  {
+    "char": "玩",
+    "pinyin": "wán",
+    "translation": "играть"
+  },
+  {
+    "char": "一起",
+    "pinyin": "yìqǐ",
+    "translation": "вместе"
+  },
+  {
+    "char": "爷爷",
+    "pinyin": "yéye",
+    "translation": "дед"
+  },
+  {
+    "char": "奶奶",
+    "pinyin": "nǎi nai",
+    "translation": "бабушка"
+  },
+  {
+    "char": "孙女",
+    "pinyin": "sūnnǚ",
+    "translation": "внучка"
+  },
+  {
+    "char": "老鼠",
+    "pinyin": "lǎoshǔ",
+    "translation": "мышь"
+  },
+  {
+    "char": "觉得",
+    "pinyin": "juéde",
+    "translation": "думать, считать, полагать"
+  },
+  {
+    "char": "睡觉",
+    "pinyin": "shuìjiào",
+    "translation": "спать, ложиться спать"
+  },
+  {
+    "char": "售货员",
+    "pinyin": "shòuhuòyuán",
+    "translation": "продавец"
+  },
+  {
+    "char": "这边",
+    "pinyin": "zhèbiān",
+    "translation": "здесь, тут"
+  },
+  {
+    "char": "这些",
+    "pinyin": "zhèxiē",
+    "translation": "эти"
+  },
+  {
+    "char": "那些",
+    "pinyin": "nàxiē",
+    "translation": "те"
+  },
+  {
+    "char": "这儿",
+    "pinyin": "zhèr",
+    "translation": "здесь"
+  },
+  {
+    "char": "水果",
+    "pinyin": "shuǐguǒ",
+    "translation": "фрукты"
+  },
+  {
+    "char": "斤",
+    "pinyin": "jīn",
+    "translation": "полкило"
+  },
+  {
+    "char": "苹果",
+    "pinyin": "píngguǒ",
+    "translation": "яблоко"
+  },
+  {
+    "char": "便宜",
+    "pinyin": "piányi",
+    "translation": "дешёвый"
+  },
+  {
+    "char": "件",
+    "pinyin": "jià",
+    "translation": "сч. сл. для одежды, дел, вещей, документов"
+  },
+  {
+    "char": "怎么样",
+    "pinyin": "zěnmeyàng",
+    "translation": "как, каким образом, каков"
+  },
+  {
+    "char": "贵",
+    "pinyin": "guì",
+    "translation": "дорогой, ценный"
+  },
+  {
+    "char": "穿",
+    "pinyin": "chuān",
+    "translation": "одевать, надевать, носить"
+  },
+  {
+    "char": "女",
+    "pinyin": "nǚ",
+    "translation": "женский"
+  },
+  {
+    "char": "男",
+    "pinyin": "nán",
+    "translation": "мужской"
+  },
+  {
+    "char": "那儿",
+    "pinyin": "nàr",
+    "translation": "там, туда"
   }
 ];
