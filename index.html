@@ -14,11 +14,17 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #333; min-height: 100vh; padding: 20px;
-      background-image: url("images/background.jpg");
-      background-position: center; /* центрируем картинку */
-      background-size: cover;      /* заполняем область, обрезая лишнее */
-      background-repeat: no-repeat;/* не повторяем */
+      position: relative;
+      isolation: isolate;
 }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: #f0f4f8 url("images/background.jpg") center / cover no-repeat;
+  }
   h1 { text-align: center; color: #2c3e50; margin-bottom: 8px; }
   .subtitle { text-align: center; color: #2c3e50; margin-bottom: 20px; font-size: 14px; }
   .stats { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
@@ -39,7 +45,7 @@
   .card-body { flex: 1; min-width: 50% }
   .card-body input { width: 100%; padding: 10px 14px; font-size: 16px; border: 1px solid #d0d5db; border-radius: 8px; outline: none; transition: border-color 0.2s; }
   .card-body input:focus { border-color: #3498db; }
-  .hint { font-size: 13px; color: #95a5a6; margin-top: 6px; display: none; }
+  .hint { font-size: 16px; color: #95a5a6; margin-top: 6px; display: none; }
   .hint.show { display: block; }
   .hint-link { font-size: 12px; color: #3498db; cursor: pointer; margin-top: 4px; display: inline-block; }
   .actions { display: flex; justify-content: center; gap: 12px; margin: 24px 0; flex-wrap: wrap; }
@@ -53,11 +59,63 @@
   .score-orange { color: #e67e22; }
   .score-red { color: #e74c3c; }
   
+  /* Локальный шрифт для названий разделов */
+@font-face {
+  font-family: 'Reggae One';
+  src: url('fonts/ReggaeOne-Regular.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
   /* Tabs */
-  .tabs { display: flex; justify-content: center; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
-  .tab { padding: 10px 20px; font-size: 15px; border: 2px solid #d0d5db; border-radius: 10px; background: #fff; cursor: pointer; transition: all 0.2s; }
-  .tab.active { background: #2c3e50; color: #fff; border-color: #2c3e50; }
-  .tab:hover:not(.active) { border-color: #3498db; }
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  max-width: 540px;
+  margin: 0 auto 24px;
+}
+.tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: 1.5;
+  padding: 12px;
+  font-size: clamp(18px, 2.5vw, 20px);
+  font-family: 'Reggae One', 'Segoe UI', Arial, sans-serif;
+  font-weight: 400;
+  text-align: center;
+  white-space: nowrap;
+  overflow-wrap: normal;
+  border: 1px solid rgba(44, 62, 80, 0.30);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.35);
+  color: #2c3e50;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.tab-label {
+  display: block;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.tab:focus-visible {
+  outline: 3px solid #3498db;
+  outline-offset: 3px;
+}
+  .tab.active {
+    background: rgba(255, 255, 255, 0.45);
+    color: #2c3e50;
+    border-color: #385c47;
+  }
+  .tab:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: #385c47;
+  }
   .tab-content { display: none; }
   .tab-content.active { display: block; }
   
@@ -195,6 +253,86 @@
   .add-char-option .opt-translation { font-size: 14px; color: #7f8c8d; margin-left: auto; }
   .add-char-options .opt-header { font-size: 13px; color: #2c3e50; font-weight: 600; margin-bottom: 2px; }
 
+
+/* Адаптация содержимого */
+.tab-content {
+  max-width: 900px;
+  margin-inline: auto;
+}
+button, input, select { font: inherit; }
+button { touch-action: manipulation; }
+.card-body, .dict-info, .result-translation, .add-word-field input {
+  min-width: 0;
+}
+.char, .dict-char, .dict-info, .result-char-pinyin,
+.result-translation, .test-char, .test-option {
+  overflow-wrap: anywhere;
+}
+.add-word-row input, .add-word-field input { width: 100%; }
+
+@media (max-width: 768px) {
+  body { padding: 16px; }
+  h1 { font-size: 26px; margin-bottom: 18px; }
+  .card, .sent-card, .add-word-section { padding: 18px; }
+  .test-card { padding: 24px 18px; }
+  .test-start-screen, .test-result { padding: 28px 8px; }
+  button, input, select { min-height: 44px; }
+  input, select { font-size: 16px; }
+  .speak-btn, .speak-btn-sm {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+  }
+  .hint-link { padding-block: 12px; font-size: 14px; }
+  .dict-item { flex-wrap: wrap; gap: 10px; padding: 16px; }
+  .dict-info { flex: 1 1 180px; }
+  .result-row { flex-wrap: wrap; }
+  .result-translation { flex: 1 1 150px; }
+  .test-prev-btn, .test-restart-during { margin: 4px; }
+}
+@media (max-width: 480px) {
+  body { padding: 12px; }
+  h1 { font-size: 23px; }
+  .tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    max-width: 360px;
+  }
+  .card-top { flex-wrap: wrap; gap: 10px; }
+  .char { min-width: 0; font-size: 34px; }
+  .add-word-field {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+  .actions > button, .add-word-actions > button {
+    flex: 1 1 140px;
+    padding-inline: 12px;
+  }
+  .test-options { grid-template-columns: minmax(0, 1fr); }
+  .test-char { font-size: 48px; }
+  .test-option { padding: 14px; }
+}
+
+/* Меню и форма раздела показываются по очереди. */
+.tabs[hidden], .section-navigation[hidden] { display: none; }
+.section-navigation {
+  max-width: 900px;
+  margin: 0 auto 18px;
+  text-align: center;
+}
+.back-to-sections {
+  min-height: 44px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.75);
+  color: #2c3e50;
+  border: 1px solid rgba(44, 62, 80, 0.30);
+}
+.back-to-sections:focus-visible {
+  outline: 3px solid #3498db;
+  outline-offset: 3px;
+}
+
 </style>
 <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pinyin-pro/3.29.4/index.js"></script>
@@ -202,17 +340,26 @@
 <body>
 <h1>Тренировка иероглифов</h1>
 
-<div class="tabs">
-  <div class="tab active" data-tab="tab1">字 - АБВ</div>
-  <div class="tab" data-tab="tab2">АБВ - 字</div>
-  <div class="tab" data-tab="tab5">Последние</div>
-  <div class="tab" data-tab="tab6">Словарь</div>
-  <div class="tab" data-tab="tab8">Имена</div>
-  <div class="tab" data-tab="tab7">Тест</div>
+<nav class="tabs" aria-label="Разделы тренажера">
+  <button type="button" class="tab" data-tab="tab1"
+          aria-controls="tab1" aria-expanded="false"><span class="tab-label">字 - АБВ</span></button>
+  <button type="button" class="tab" data-tab="tab2"
+          aria-controls="tab2" aria-expanded="false"><span class="tab-label">АБВ - 字</span></button>
+  <button type="button" class="tab" data-tab="tab5"
+          aria-controls="tab5" aria-expanded="false"><span class="tab-label">Последние</span></button>
+  <button type="button" class="tab" data-tab="tab7"
+          aria-controls="tab7" aria-expanded="false"><span class="tab-label">Тест</span></button>
+  <button type="button" class="tab" data-tab="tab6"
+          aria-controls="tab6" aria-expanded="false"><span class="tab-label">Словарь</span></button>
+  <button type="button" class="tab" data-tab="tab8"
+          aria-controls="tab8" aria-expanded="false"><span class="tab-label">Имена</span></button>
+</nav>
+<div class="section-navigation" id="section-navigation" hidden>
+  <button type="button" class="back-to-sections" id="back-to-sections">← К разделам</button>
 </div>
 
 <!-- TAB 1: 字 - АБВ -->
-<div class="tab-content active" id="tab1">
+<div class="tab-content" id="tab1">
   <p class="subtitle">Переведите 10 иероглифов на русский</p>
   <div id="result-banner"></div>
   <div id="quiz"></div>
@@ -444,21 +591,143 @@ function checkPinyin(user, correct) {
   return variants.some(v => v === u);
 }
 
+// Подгоняем названия по ширине после загрузки шрифта и изменения экрана.
+const sectionMenu = document.querySelector('.tabs');
+let sectionLabelFrame = null;
+
+function fitSectionLabels() {
+  if (sectionMenu.hidden) return;
+  sectionMenu.querySelectorAll('.tab').forEach(button => {
+    const label = button.querySelector('.tab-label');
+    if (!label) return;
+    label.style.fontSize = '';
+    const style = getComputedStyle(button);
+    const available = button.clientWidth
+      - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) - 1;
+    const width = label.getBoundingClientRect().width;
+    if (available > 0 && width > available) {
+      const baseSize = parseFloat(getComputedStyle(label).fontSize);
+      label.style.fontSize = (Math.floor(baseSize * available / width * 100) / 100) + 'px';
+    }
+  });
+}
+
+function scheduleSectionLabelFit() {
+  if (sectionLabelFrame !== null) cancelAnimationFrame(sectionLabelFrame);
+  sectionLabelFrame = requestAnimationFrame(() => {
+    sectionLabelFrame = null;
+    fitSectionLabels();
+  });
+}
+
+scheduleSectionLabelFit();
+if ('ResizeObserver' in window) {
+  const sectionMenuObserver = new ResizeObserver(scheduleSectionLabelFit);
+  sectionMenuObserver.observe(sectionMenu);
+}
+window.addEventListener('resize', scheduleSectionLabelFit);
+if (document.fonts) {
+  document.fonts.ready.then(scheduleSectionLabelFit);
+  document.fonts.addEventListener('loadingdone', scheduleSectionLabelFit);
+}
+
 // === TAB SWITCHING ===
+const initializedSections = new Set();
+const sectionNavigation = document.getElementById('section-navigation');
+const backToSectionsButton = document.getElementById('back-to-sections');
+let lastSectionButton = null;
+
+backToSectionsButton.addEventListener('click', () => {
+  document.querySelectorAll('.tab-content').forEach(section => {
+    section.classList.remove('active');
+  });
+  document.querySelectorAll('.tab').forEach(button => {
+    button.classList.remove('active');
+    button.setAttribute('aria-expanded', 'false');
+  });
+  sectionNavigation.hidden = true;
+  sectionMenu.hidden = false;
+  scheduleSectionLabelFit();
+  if (lastSectionButton) lastSectionButton.focus({ preventScroll: true });
+  window.scrollTo(0, 0);
+});
+
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById(tab.dataset.tab).classList.add('active');
+    const sectionId = tab.dataset.tab;
+
+    document.querySelectorAll('.tab').forEach(button => {
+      const selected = button === tab;
+      button.classList.toggle('active', selected);
+      button.setAttribute('aria-expanded', String(selected));
+    });
+
+    document.querySelectorAll('.tab-content').forEach(section => {
+      section.classList.toggle('active', section.id === sectionId);
+    });
+
+    lastSectionButton = tab;
+    sectionMenu.hidden = true;
+    sectionNavigation.hidden = false;
+    backToSectionsButton.focus({ preventScroll: true });
+    window.scrollTo(0, 0);
+
+    if (!initializedSections.has(sectionId)) {
+      if (sectionId === 'tab1') renderQuiz();
+      if (sectionId === 'tab2') renderQuiz2();
+      if (sectionId === 'tab5') renderQuiz5();
+
+      initializedSections.add(sectionId);
+    }
   });
 });
 
+// Текст словаря не интерпретируется как HTML или JavaScript.
+function makeElement(tag, className, text) {
+  const element = document.createElement(tag);
+  element.className = className;
+  if (text !== undefined) element.textContent = text;
+  return element;
+}
+
+function makeSpeakButton(text, className) {
+  const button = makeElement('button', className, '🔊');
+  button.type = 'button';
+  button.setAttribute('aria-label', 'Прослушать слово');
+  button.addEventListener('click', () => speakChinese(text));
+  return button;
+}
+
+function resetQuizTransition(state, buttonId) {
+  clearTimeout(state.timer);
+  state.timer = null;
+  state.transitioning = false;
+  state.round = (state.round || 0) + 1;
+  document.getElementById(buttonId).disabled = false;
+}
+
+function moveQuizNext(state, render, buttonId, delay = 0) {
+  if (state.transitioning || state.idx >= state.items.length) return;
+  const round = state.round;
+  state.transitioning = true;
+  document.getElementById(buttonId).disabled = true;
+  state.timer = setTimeout(() => {
+    if (round !== state.round) return;
+    state.timer = null;
+    state.idx++;
+    state.transitioning = false;
+    document.getElementById(buttonId).disabled = state.idx >= state.items.length;
+    render(true);
+  }, delay);
+}
+
 // === TAB 1: 字 - АБВ ===
 
-let quiz1State = { items: [], idx: 0, results: [], answered: false };
+let quiz1State = { items: [], idx: 0, results: [], answered: false, transitioning: false, timer: null, round: 0 };
 
 function renderQuiz() {
+  resetQuizTransition(quiz1State, 'next-btn');
+  document.getElementById('next-btn').style.display = '';
   quiz1State.items = shuffle(dictionary).slice(0, Math.min(10, dictionary.length));
   quiz1State.idx = 0;
   quiz1State.results = [];
@@ -471,10 +740,12 @@ function renderQuiz() {
   renderQuizCard();
 }
 
-function renderQuizCard() {
+function renderQuizCard(focusInput = false) {
   const quiz = document.getElementById('quiz');
   quiz.innerHTML = '';
   if (quiz1State.idx >= quiz1State.items.length) {
+    document.getElementById('next-btn').disabled = true;
+    document.getElementById('next-btn').style.display = 'none';
     showQuizResults(quiz1State.results, document.getElementById('result-banner'));
     return;
   }
@@ -487,21 +758,29 @@ function renderQuizCard() {
   const card = document.createElement('div');
   card.className = 'card';
   card.id = 'quiz-card-current';
-  card.innerHTML = `
-    <div class="card-top">
-      <div class="char">${item.char}</div>
-      <button class="speak-btn" onclick="speakChinese('${item.char}')">🔊</button>
-    </div>
-    <div class="card-body">
-      <input type="text" placeholder="Перевод на русский…" id="quiz-input" data-correct="${item.translation.replace(/"/g, '&quot;')}" data-pinyin="${item.pinyin || ''}">
-      <span class="hint-link" onclick="toggleHint(this)">показать ответ</span>
-      <div class="hint">Пиньинь: ${item.pinyin || '—'} | Перевод: ${item.translation}</div>
-    </div>
-  `;
+  const top = makeElement('div', 'card-top');
+  const char = makeElement('div', 'char', item.char);
+  top.append(char, makeSpeakButton(item.char, 'speak-btn'));
+
+  const body = makeElement('div', 'card-body');
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.placeholder = 'Перевод на русский…';
+  input.id = 'quiz-input';
+  input.dataset.correct = item.translation;
+  input.dataset.pinyin = item.pinyin || '';
+  const hintLink = makeElement('span', 'hint-link', 'показать ответ');
+  hintLink.addEventListener('click', () => toggleHint(hintLink));
+  const hint = makeElement('div', 'hint', 'Пиньинь: ' + (item.pinyin || '—') + ' | Перевод: ' + item.translation);
+  body.append(input, hintLink, hint);
+  card.append(top, body);
   quiz.appendChild(card);
   quiz1State.answered = false;
   const inp = card.querySelector('input');
-  inp.focus();
+  // Вход в раздел — без курсора; следующая видимая карточка — с курсором.
+  if (focusInput && inp.closest('.tab-content').classList.contains('active')) {
+    inp.focus({ preventScroll: true });
+  }
   inp.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -511,32 +790,31 @@ function renderQuizCard() {
 }
 
 function handleQuiz1Next() {
-  if (!quiz1State.answered) {
-    const card = document.getElementById('quiz-card-current');
-    const inp = card.querySelector('input');
-    if (!inp.value.trim()) {
-      const item = quiz1State.items[quiz1State.idx];
-      quiz1State.results.push({ char: item.char, pinyin: item.pinyin || '—', translation: item.translation, userAnswer: '(пусто)', correct: false });
-      card.classList.remove('correct', 'wrong');
-      card.classList.add('wrong');
-      quiz1State.answered = true;
-      quiz1State.idx++;
-      setTimeout(() => renderQuizCard(), 500);
-      return;
-    }
-    const item = quiz1State.items[quiz1State.idx];
-    const ok = checkAnswer(inp.value, inp.dataset.correct);
-    quiz1State.results.push({ char: item.char, pinyin: item.pinyin || '—', translation: item.translation, userAnswer: inp.value || '(пусто)', correct: ok });
-    card.classList.remove('correct', 'wrong');
-    card.classList.add(ok ? 'correct' : 'wrong');
-    quiz1State.answered = true;
-    if (ok) {
-      quiz1State.idx++;
-      setTimeout(() => renderQuizCard(), 500);
-    }
-  } else {
-    quiz1State.idx++;
-    renderQuizCard();
+  if (quiz1State.transitioning || quiz1State.idx >= quiz1State.items.length) return;
+  const card = document.getElementById('quiz-card-current');
+  if (!card) return;
+
+  if (quiz1State.answered) {
+    moveQuizNext(quiz1State, renderQuizCard, 'next-btn');
+    return;
+  }
+
+  const inp = card.querySelector('input');
+  const item = quiz1State.items[quiz1State.idx];
+  const empty = !inp.value.trim();
+  const ok = !empty && (checkAnswer(inp.value, inp.dataset.correct));
+  quiz1State.results.push({
+    char: item.char,
+    pinyin: item.pinyin || '—',
+    translation: item.translation,
+    userAnswer: empty ? '(пусто)' : inp.value,
+    correct: ok
+  });
+  card.classList.remove('correct', 'wrong');
+  card.classList.add(ok ? 'correct' : 'wrong');
+  quiz1State.answered = true;
+  if (ok || empty) {
+    moveQuizNext(quiz1State, renderQuizCard, 'next-btn', 500);
   }
 }
 
@@ -549,13 +827,14 @@ function toggleHint(link) {
 document.getElementById('next-btn').addEventListener('click', handleQuiz1Next);
 document.getElementById('new-btn').addEventListener('click', renderQuiz);
 
-renderQuiz();
 
 // === TAB 2: АБВ - 字 ===
 
-let quiz2State = { items: [], idx: 0, results: [], answered: false };
+let quiz2State = { items: [], idx: 0, results: [], answered: false, transitioning: false, timer: null, round: 0 };
 
 function renderQuiz2() {
+  resetQuizTransition(quiz2State, 'next-btn2');
+  document.getElementById('next-btn2').style.display = '';
   quiz2State.items = shuffle(dictionary).slice(0, Math.min(10, dictionary.length));
   quiz2State.idx = 0;
   quiz2State.results = [];
@@ -568,10 +847,12 @@ function renderQuiz2() {
   renderQuiz2Card();
 }
 
-function renderQuiz2Card() {
+function renderQuiz2Card(focusInput = false) {
   const quiz = document.getElementById('quiz2');
   quiz.innerHTML = '';
   if (quiz2State.idx >= quiz2State.items.length) {
+    document.getElementById('next-btn2').disabled = true;
+    document.getElementById('next-btn2').style.display = 'none';
     showQuizResults(quiz2State.results, document.getElementById('result-banner2'));
     return;
   }
@@ -584,21 +865,30 @@ function renderQuiz2Card() {
   const card = document.createElement('div');
   card.className = 'card';
   card.id = 'quiz2-card-current';
-  card.innerHTML = `
-    <div class="card-top">
-      <div class="char" style="font-size: 16px;">${item.translation}</div>
-      <button class="speak-btn" onclick="speakChinese('${item.char}')">🔊</button>
-    </div>
-    <div class="card-body">
-      <input type="text" placeholder="Введите пиньинь или иероглиф…" id="quiz2-input" data-pinyin="${item.pinyin}" data-char="${item.char}">
-      <span class="hint-link" onclick="toggleHint2(this)">показать ответ</span>
-      <div class="hint">Пиньинь: ${item.pinyin} | Иероглиф: ${item.char}</div>
-    </div>
-  `;
+  const top = makeElement('div', 'card-top');
+  const char = makeElement('div', 'char', item.translation);
+  char.style.fontSize = '16px';
+  top.append(char, makeSpeakButton(item.char, 'speak-btn'));
+
+  const body = makeElement('div', 'card-body');
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.placeholder = 'Введите пиньинь или иероглиф…';
+  input.id = 'quiz2-input';
+  input.dataset.pinyin = item.pinyin;
+  input.dataset.char = item.char;
+  const hintLink = makeElement('span', 'hint-link', 'показать ответ');
+  hintLink.addEventListener('click', () => toggleHint2(hintLink));
+  const hint = makeElement('div', 'hint', 'Пиньинь: ' + item.pinyin + ' | Иероглиф: ' + item.char);
+  body.append(input, hintLink, hint);
+  card.append(top, body);
   quiz.appendChild(card);
   quiz2State.answered = false;
   const inp = card.querySelector('input');
-  inp.focus();
+  // Вход в раздел — без курсора; следующая видимая карточка — с курсором.
+  if (focusInput && inp.closest('.tab-content').classList.contains('active')) {
+    inp.focus({ preventScroll: true });
+  }
   inp.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -608,32 +898,31 @@ function renderQuiz2Card() {
 }
 
 function handleQuiz2Next() {
-  if (!quiz2State.answered) {
-    const card = document.getElementById('quiz2-card-current');
-    const inp = card.querySelector('input');
-    if (!inp.value.trim()) {
-      const item = quiz2State.items[quiz2State.idx];
-      quiz2State.results.push({ char: item.char, pinyin: item.pinyin, translation: item.translation, userAnswer: '(пусто)', correct: false });
-      card.classList.remove('correct', 'wrong');
-      card.classList.add('wrong');
-      quiz2State.answered = true;
-      quiz2State.idx++;
-      setTimeout(() => renderQuiz2Card(), 500);
-      return;
-    }
-    const item = quiz2State.items[quiz2State.idx];
-    const ok = checkPinyin(inp.value, inp.dataset.pinyin) || inp.value.trim() === item.char;
-    quiz2State.results.push({ char: item.char, pinyin: item.pinyin, translation: item.translation, userAnswer: inp.value || '(пусто)', correct: ok });
-    card.classList.remove('correct', 'wrong');
-    card.classList.add(ok ? 'correct' : 'wrong');
-    quiz2State.answered = true;
-    if (ok) {
-      quiz2State.idx++;
-      setTimeout(() => renderQuiz2Card(), 500);
-    }
-  } else {
-    quiz2State.idx++;
-    renderQuiz2Card();
+  if (quiz2State.transitioning || quiz2State.idx >= quiz2State.items.length) return;
+  const card = document.getElementById('quiz2-card-current');
+  if (!card) return;
+
+  if (quiz2State.answered) {
+    moveQuizNext(quiz2State, renderQuiz2Card, 'next-btn2');
+    return;
+  }
+
+  const inp = card.querySelector('input');
+  const item = quiz2State.items[quiz2State.idx];
+  const empty = !inp.value.trim();
+  const ok = !empty && (checkPinyin(inp.value, inp.dataset.pinyin) || inp.value.trim() === item.char);
+  quiz2State.results.push({
+    char: item.char,
+    pinyin: item.pinyin,
+    translation: item.translation,
+    userAnswer: empty ? '(пусто)' : inp.value,
+    correct: ok
+  });
+  card.classList.remove('correct', 'wrong');
+  card.classList.add(ok ? 'correct' : 'wrong');
+  quiz2State.answered = true;
+  if (ok || empty) {
+    moveQuizNext(quiz2State, renderQuiz2Card, 'next-btn2', 500);
   }
 }
 
@@ -646,11 +935,10 @@ function toggleHint2(link) {
 document.getElementById('next-btn2').addEventListener('click', handleQuiz2Next);
 document.getElementById('new-btn2').addEventListener('click', renderQuiz2);
 
-renderQuiz2();
 
 // === TAB 5: Последние ===
 
-let quiz5State = { items: [], idx: 0, results: [], answered: false };
+let quiz5State = { items: [], idx: 0, results: [], answered: false, transitioning: false, timer: null, round: 0 };
 let lastCount = 50;
 
 function getLastWords() {
@@ -663,6 +951,8 @@ function updateTab5Subtitle() {
 }
 
 function renderQuiz5() {
+  resetQuizTransition(quiz5State, 'next-btn5');
+  document.getElementById('next-btn5').style.display = '';
   const pool = getLastWords();
   quiz5State.items = shuffle(pool).slice(0, Math.min(10, pool.length));
   quiz5State.idx = 0;
@@ -676,10 +966,12 @@ function renderQuiz5() {
   renderQuiz5Card();
 }
 
-function renderQuiz5Card() {
+function renderQuiz5Card(focusInput = false) {
   const quiz = document.getElementById('quiz5');
   quiz.innerHTML = '';
   if (quiz5State.idx >= quiz5State.items.length) {
+    document.getElementById('next-btn5').disabled = true;
+    document.getElementById('next-btn5').style.display = 'none';
     showQuizResults(quiz5State.results, document.getElementById('result-banner5'));
     return;
   }
@@ -692,21 +984,29 @@ function renderQuiz5Card() {
   const card = document.createElement('div');
   card.className = 'card';
   card.id = 'quiz5-card-current';
-  card.innerHTML = `
-    <div class="card-top">
-      <div class="char">${item.char}</div>
-      <button class="speak-btn" onclick="speakChinese('${item.char}')">🔊</button>
-    </div>
-    <div class="card-body">
-      <input type="text" placeholder="Перевод на русский…" id="quiz5-input" data-correct="${item.translation.replace(/"/g, '&quot;')}" data-pinyin="${item.pinyin || ''}">
-      <span class="hint-link" onclick="toggleHint5(this)">показать ответ</span>
-      <div class="hint">Пиньинь: ${item.pinyin || '—'} | Перевод: ${item.translation}</div>
-    </div>
-  `;
+  const top = makeElement('div', 'card-top');
+  const char = makeElement('div', 'char', item.char);
+  top.append(char, makeSpeakButton(item.char, 'speak-btn'));
+
+  const body = makeElement('div', 'card-body');
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.placeholder = 'Перевод на русский…';
+  input.id = 'quiz5-input';
+  input.dataset.correct = item.translation;
+  input.dataset.pinyin = item.pinyin || '';
+  const hintLink = makeElement('span', 'hint-link', 'показать ответ');
+  hintLink.addEventListener('click', () => toggleHint5(hintLink));
+  const hint = makeElement('div', 'hint', 'Пиньинь: ' + (item.pinyin || '—') + ' | Перевод: ' + item.translation);
+  body.append(input, hintLink, hint);
+  card.append(top, body);
   quiz.appendChild(card);
   quiz5State.answered = false;
   const inp = card.querySelector('input');
-  inp.focus();
+  // Вход в раздел — без курсора; следующая видимая карточка — с курсором.
+  if (focusInput && inp.closest('.tab-content').classList.contains('active')) {
+    inp.focus({ preventScroll: true });
+  }
   inp.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -716,32 +1016,31 @@ function renderQuiz5Card() {
 }
 
 function handleQuiz5Next() {
-  if (!quiz5State.answered) {
-    const card = document.getElementById('quiz5-card-current');
-    const inp = card.querySelector('input');
-    if (!inp.value.trim()) {
-      const item = quiz5State.items[quiz5State.idx];
-      quiz5State.results.push({ char: item.char, pinyin: item.pinyin || '—', translation: item.translation, userAnswer: '(пусто)', correct: false });
-      card.classList.remove('correct', 'wrong');
-      card.classList.add('wrong');
-      quiz5State.answered = true;
-      quiz5State.idx++;
-      setTimeout(() => renderQuiz5Card(), 500);
-      return;
-    }
-    const item = quiz5State.items[quiz5State.idx];
-    const ok = checkAnswer(inp.value, inp.dataset.correct);
-    quiz5State.results.push({ char: item.char, pinyin: item.pinyin || '—', translation: item.translation, userAnswer: inp.value || '(пусто)', correct: ok });
-    card.classList.remove('correct', 'wrong');
-    card.classList.add(ok ? 'correct' : 'wrong');
-    quiz5State.answered = true;
-    if (ok) {
-      quiz5State.idx++;
-      setTimeout(() => renderQuiz5Card(), 500);
-    }
-  } else {
-    quiz5State.idx++;
-    renderQuiz5Card();
+  if (quiz5State.transitioning || quiz5State.idx >= quiz5State.items.length) return;
+  const card = document.getElementById('quiz5-card-current');
+  if (!card) return;
+
+  if (quiz5State.answered) {
+    moveQuizNext(quiz5State, renderQuiz5Card, 'next-btn5');
+    return;
+  }
+
+  const inp = card.querySelector('input');
+  const item = quiz5State.items[quiz5State.idx];
+  const empty = !inp.value.trim();
+  const ok = !empty && (checkAnswer(inp.value, inp.dataset.correct));
+  quiz5State.results.push({
+    char: item.char,
+    pinyin: item.pinyin || '—',
+    translation: item.translation,
+    userAnswer: empty ? '(пусто)' : inp.value,
+    correct: ok
+  });
+  card.classList.remove('correct', 'wrong');
+  card.classList.add(ok ? 'correct' : 'wrong');
+  quiz5State.answered = true;
+  if (ok || empty) {
+    moveQuizNext(quiz5State, renderQuiz5Card, 'next-btn5', 500);
   }
 }
 
@@ -763,7 +1062,6 @@ if (lastCountSelect) {
   });
 }
 
-renderQuiz5();
 
 // === SHARED: Results list ===
 
@@ -783,14 +1081,16 @@ function showQuizResults(results, banner) {
   results.forEach(r => {
     const row = document.createElement('div');
     row.className = 'result-row ' + (r.correct ? 'ok' : 'err');
-    row.innerHTML = `
-      <div class="result-mark">${r.correct ? '✓' : '✗'}</div>
-      <div class="result-char-pinyin">
-        <div class="result-char">${r.char}</div>
-        <div class="result-pinyin">${r.pinyin}</div>
-      </div>
-      <div class="result-translation">${r.translation}</div>
-    `;
+    const charPinyin = makeElement('div', 'result-char-pinyin');
+    charPinyin.append(
+      makeElement('div', 'result-char', r.char),
+      makeElement('div', 'result-pinyin', r.pinyin)
+    );
+    row.append(
+      makeElement('div', 'result-mark', r.correct ? '✓' : '✗'),
+      charPinyin,
+      makeElement('div', 'result-translation', r.translation)
+    );
     list.appendChild(row);
   });
   container.appendChild(list);
@@ -857,14 +1157,16 @@ function renderDictResults(results) {
   results.forEach(item => {
     const div = document.createElement('div');
     div.className = 'dict-item';
-    div.innerHTML = `
-      <div class="dict-char">${item.char}</div>
-      <button class="speak-btn-sm" onclick="speakChinese('${item.char}')">🔊</button>
-      <div class="dict-info">
-        <div class="dict-pinyin">${item.pinyin || '—'}</div>
-        <div class="dict-translation">${item.translation}</div>
-      </div>
-    `;
+    const info = makeElement('div', 'dict-info');
+    info.append(
+      makeElement('div', 'dict-pinyin', item.pinyin || '—'),
+      makeElement('div', 'dict-translation', item.translation)
+    );
+    div.append(
+      makeElement('div', 'dict-char', item.char),
+      makeSpeakButton(item.char, 'speak-btn-sm'),
+      info
+    );
     container.appendChild(div);
   });
 }
@@ -874,8 +1176,7 @@ document.getElementById('dict-search').addEventListener('input', (e) => {
   renderDictResults(results);
 });
 
-// Show all words initially
-renderDictResults(dictionary);
+
 
 // === ADD WORD TO DICTIONARY ===
 
@@ -888,10 +1189,6 @@ const addTranslationInput = document.getElementById('add-translation');
 const addConfirmBtn = document.getElementById('add-confirm-btn');
 const addCancelBtn = document.getElementById('add-cancel-btn');
 const addStatus = document.getElementById('add-status');
-
-// Determine the server endpoint for saving words.
-// Tries save_word.php (same directory). Falls back to localStorage-only if server is unavailable.
-const SAVE_ENDPOINT = 'save_word.php';
 
 addLookupBtn.addEventListener('click', lookupWord);
 addCharInput.addEventListener('keydown', e => {
@@ -1059,9 +1356,11 @@ async function lookupWord() {
     optionsData.forEach((opt) => {
       const div = document.createElement('div');
       div.className = 'add-char-option';
-      div.innerHTML = '<div class="opt-char">' + opt.char + '</div>' +
-                      '<div class="opt-pinyin">' + (opt.pinyin || '—') + '</div>' +
-                      '<div class="opt-translation">' + charVal + '</div>';
+      div.append(
+        makeElement('div', 'opt-char', opt.char),
+        makeElement('div', 'opt-pinyin', opt.pinyin || '—'),
+        makeElement('div', 'opt-translation', charVal)
+      );
       div.addEventListener('click', function() { selectCharOption(opt.char, opt.pinyin, charVal); });
       addCharOptions.appendChild(div);
     });
@@ -1104,7 +1403,7 @@ function selectCharOption(charVal, pinyinVal, russianVal) {
   addPinyinInput.focus();
 }
 
-async function confirmAddWord() {
+function confirmAddWord() {
   const charVal = addCharInput.value.trim();
   const pinyinVal = addPinyinInput.value.trim();
   const translationVal = addTranslationInput.value.trim();
@@ -1125,33 +1424,11 @@ async function confirmAddWord() {
 
   addConfirmBtn.disabled = true;
   addConfirmBtn.textContent = 'Добавляю…';
-  addStatus.textContent = 'Сохранение на сервере…';
-  addStatus.className = 'add-status loading';
-
-  let serverSaved = false;
-
-  // Try to save on server
-  try {
-    const formData = new FormData();
-    formData.append('char', charVal);
-    formData.append('pinyin', pinyinVal);
-    formData.append('translation', translationVal);
-
-    const resp = await fetch(SAVE_ENDPOINT, { method: 'POST', body: formData });
-    if (resp.ok) {
-      const text = await resp.text();
-      if (text.includes('OK') || text.includes('ok') || text.includes('success')) {
-        serverSaved = true;
-      }
-    }
-  } catch (e) {
-    console.log('Server save error:', e);
-  }
-
-  // Добавляем запись в рабочий словарь независимо от состояния сервера.
+  // Добавляем запись в рабочий словарь.
   dictionary.push(candidateWord);
 
-  // Держим локальную копию до появления записи в обновлённом words.js.
+  // Существующий механизм сохранения локальной копии.
+  let localSaved = false;
   try {
     const storageKey = 'Chinese-quiz_custom_words';
     const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
@@ -1162,6 +1439,7 @@ async function confirmAddWord() {
     }
 
     localStorage.setItem(storageKey, JSON.stringify(localWords));
+    localSaved = true;
   } catch (e) {
     console.error('Ошибка сохранения слова:', e);
   }
@@ -1173,11 +1451,11 @@ async function confirmAddWord() {
   addConfirmBtn.disabled = false;
   addConfirmBtn.textContent = 'Добавить в словарь';
 
-  if (serverSaved) {
-    addStatus.textContent = 'Слово добавлено в словарь и сохранено на сервере!';
+  if (localSaved) {
+    addStatus.textContent = 'Слово сохранено локально';
     addStatus.className = 'add-status success';
   } else {
-    addStatus.textContent = 'Слово добавлено локально. Сервер недоступен — слово сохранится на сервере при следующем обновлении.';
+    addStatus.textContent = 'Не удалось сохранить слово локально.';
     addStatus.className = 'add-status error';
   }
 
@@ -1245,12 +1523,14 @@ async function confirmAddWord() {
       'Осталось:', localWords.length
     );
 
-    renderDictResults(dictionary);
   } catch (e) {
     console.error('Ошибка очистки localStorage:', e);
   }
 })();
 
+
+// Тренировочные раунды создаются при первом открытии раздела.
+renderDictResults(dictionary);
 
 // === TAB 8: Имена ===
 
@@ -1312,14 +1592,16 @@ function renderNamesResults(results) {
   results.forEach(item => {
     const div = document.createElement('div');
     div.className = 'dict-item';
-    div.innerHTML = `
-      <div class="dict-char">${item.char}</div>
-      <button class="speak-btn-sm" onclick="speakChinese('${item.char}')">🔊</button>
-      <div class="dict-info">
-        <div class="dict-pinyin">${item.pinyin || '—'}</div>
-        <div class="dict-translation">${item.translation}</div>
-      </div>
-    `;
+    const info = makeElement('div', 'dict-info');
+    info.append(
+      makeElement('div', 'dict-pinyin', item.pinyin || '—'),
+      makeElement('div', 'dict-translation', item.translation)
+    );
+    div.append(
+      makeElement('div', 'dict-char', item.char),
+      makeSpeakButton(item.char, 'speak-btn-sm'),
+      info
+    );
     container.appendChild(div);
   });
 }
@@ -1341,8 +1623,28 @@ let testCurrentIdx = 0;
 let testScore = 0;
 let testCount = 10;
 let testSoundEnabled = true;
+let testVersion = 0;
+const testTimers = new Set();
+
+function cancelTestPending() {
+  testVersion++;
+  for (const timer of testTimers) clearTimeout(timer);
+  testTimers.clear();
+  if (typeof responsiveVoice !== 'undefined') responsiveVoice.cancel();
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+}
+
+function setTestTimer(callback, delay, version) {
+  const timer = setTimeout(() => {
+    testTimers.delete(timer);
+    if (version === testVersion) callback();
+  }, delay);
+  testTimers.add(timer);
+  return timer;
+}
 
 function startTest() {
+  cancelTestPending();
   const sel = document.getElementById('test-count');
   const sel2 = document.getElementById('test-count2');
   testCount = parseInt(sel ? sel.value : (sel2 ? sel2.value : 10));
@@ -1360,6 +1662,7 @@ function startTest() {
 }
 
 function restartTest() {
+  cancelTestPending();
   document.getElementById('test-quiz').style.display = 'none';
   document.getElementById('test-result').style.display = 'none';
   document.getElementById('test-start').style.display = 'block';
@@ -1375,6 +1678,7 @@ function updateTestPrevButton() {
 }
 
 function renderTestQuestion(isReview) {
+  cancelTestPending();
   const q = testQuestions[testCurrentIdx];
   const container = document.getElementById('test-card-container');
   container.innerHTML = '';
@@ -1433,11 +1737,13 @@ function renderTestQuestion(isReview) {
   card.appendChild(optionsDiv);
 
   // If reviewing a previous card, add a "Next" button to go forward
-  if (isReview) {
+  if (isReview || q.userAnswer !== null) {
     const nextBtn = document.createElement('button');
     nextBtn.className = 'test-next-btn';
     nextBtn.textContent = 'Следующая →';
     nextBtn.addEventListener('click', () => {
+      if (testQuestions[testCurrentIdx] !== q) return;
+      cancelTestPending();
       testCurrentIdx++;
       if (testCurrentIdx < testQuestions.length) {
         renderTestQuestion(testQuestions[testCurrentIdx].userAnswer !== null);
@@ -1469,6 +1775,8 @@ function speakChineseWithCallback(text, onEnd) {
 }
 
 function handleTestAnswer(btn, selected, q) {
+  if (q.userAnswer !== null || testQuestions[testCurrentIdx] !== q) return;
+  const version = testVersion;
   const allOptions = btn.parentElement.querySelectorAll('.test-option');
   allOptions.forEach(o => o.classList.add('disabled'));
 
@@ -1497,32 +1805,34 @@ function handleTestAnswer(btn, selected, q) {
   charDiv.addEventListener('click', () => speakChinese(q.char));
 
   function advance() {
+    if (version !== testVersion || testQuestions[testCurrentIdx] !== q) return;
     testCurrentIdx++;
     if (testCurrentIdx < testQuestions.length) {
-      renderTestQuestion(false);
+      renderTestQuestion(testQuestions[testCurrentIdx].userAnswer !== null);
     } else {
       showTestResult();
     }
   }
 
   if (testSoundEnabled) {
-    // Play audio, then wait 1 second after audio ends
     let advanced = false;
+    let fallbackTimer = null;
     function doAdvance() {
-      if (advanced) return;
+      if (advanced || version !== testVersion) return;
       advanced = true;
-      setTimeout(advance, 500);
+      clearTimeout(fallbackTimer);
+      testTimers.delete(fallbackTimer);
+      setTestTimer(advance, 500, version);
     }
+    fallbackTimer = setTestTimer(doAdvance, 8000, version);
     speakChineseWithCallback(q.char, doAdvance);
-    // Fallback: if audio doesn't fire onend within 8 seconds, advance anyway
-    setTimeout(doAdvance, 8000);
   } else {
-    // No sound — wait 1 second then advance
-    setTimeout(advance, 1000);
+    setTestTimer(advance, 1000, version);
   }
 }
 
 function showTestResult() {
+  cancelTestPending();
   document.getElementById('test-quiz').style.display = 'none';
   const resultDiv = document.getElementById('test-result');
   const scoreDiv = document.getElementById('test-score');
@@ -1539,14 +1849,16 @@ function showTestResult() {
   testQuestions.forEach(q => {
     const row = document.createElement('div');
     row.className = 'result-row ' + (q.isCorrect ? 'ok' : 'err');
-    row.innerHTML = `
-      <div class="result-mark">${q.isCorrect ? '✓' : '✗'}</div>
-      <div class="result-char-pinyin">
-        <div class="result-char">${q.char}</div>
-        <div class="result-pinyin">${q.pinyin}</div>
-      </div>
-      <div class="result-translation">${q.correct}</div>
-    `;
+    const charPinyin = makeElement('div', 'result-char-pinyin');
+    charPinyin.append(
+      makeElement('div', 'result-char', q.char),
+      makeElement('div', 'result-pinyin', q.pinyin)
+    );
+    row.append(
+      makeElement('div', 'result-mark', q.isCorrect ? '✓' : '✗'),
+      charPinyin,
+      makeElement('div', 'result-translation', q.correct)
+    );
     listDiv.appendChild(row);
   });
 
@@ -1574,6 +1886,7 @@ document.getElementById('test-sound-toggle').addEventListener('click', function(
 // Previous card button
 document.getElementById('test-prev-btn').addEventListener('click', function() {
   if (testCurrentIdx > 0) {
+    cancelTestPending();
     testCurrentIdx--;
     renderTestQuestion(testQuestions[testCurrentIdx].userAnswer !== null);
   }
