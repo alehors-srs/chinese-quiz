@@ -1,0 +1,94 @@
+name: Update common code from Baozi
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_ref:
+        description: 'Baozi branch, tag or full commit SHA (main = current version)'
+        required: true
+        default: main
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-update-and-pages
+  cancel-in-progress: false
+
+jobs:
+  update-and-build:
+    if: github.repository == 'alehors-srs/chinese-quiz' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Check out this site's latest main
+        uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Check out shared source (read only)
+        uses: actions/checkout@v5
+        with:
+          repository: alehors-srs/Baozi
+          ref: ${{ inputs.source_ref }}
+          path: .common-source
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Copy only the common files
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_sha="$(git -C .common-source rev-parse HEAD)"
+          python scripts/sync_common.py --source .common-source --source-sha "$source_sha"
+          echo "Source: alehors-srs/Baozi@$source_sha" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Validate shared code and build this site
+        run: |
+          python -m unittest discover -s tests -v
+          node --check site-config.js
+          node --check app.js
+          node --check sw.js
+          python scripts/prepare_site.py --output-dir _site
+
+      - name: Commit the common code in this repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -- index.html app.css app.js sw.js scripts/prepare_site.py scripts/sync_dictionary.py scripts/sync_common.py tests/test_sync_dictionary.py tests/test_common_code.py common-version.json
+          if ! git diff --cached --quiet; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git commit -m 'Update common trainer code from Baozi'
+            # A concurrent manual edit causes a rejection, never a force push.
+            git push origin HEAD:main
+          fi
+
+      - name: Upload this site's public files
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    needs: update-and-build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy this site
+        id: deployment
+        uses: actions/deploy-pages@v4
