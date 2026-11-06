@@ -1,5 +1,7 @@
 // Индивидуальные настройки. Обновление общего кода этот файл не заменяет.
 window.TRAINER_CONFIG = Object.freeze({
+  "aiApiUrl": "https://baozi-deepseek-api.alehors.workers.dev",
+  "aiSiteId": "chinese-quiz",
   "title": "Chinese-quiz",
   "siteUrl": "https://alehors-srs.github.io/chinese-quiz/",
   "customWordsKey": "Chinese-quiz_custom_words",
@@ -10,3 +12,4 @@ window.TRAINER_CONFIG = Object.freeze({
     "names": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRzLKGjJkBKkLgJsEC76wwT9-OBfnMTKpDxSDo813EM6VQIK0Jsu5Cmfv5AbnS_xrpvDSRdUGBmkAzr/pub?gid=1665079648&single=true&output=csv"
   }
 });
+
