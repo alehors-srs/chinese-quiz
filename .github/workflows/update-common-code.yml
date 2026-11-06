@@ -49,7 +49,7 @@ jobs:
         run: |
           set -euo pipefail
           source_sha="$(git -C .common-source rev-parse HEAD)"
-          python scripts/sync_common.py --source .common-source --source-sha "$source_sha"
+          python .common-source/scripts/sync_common.py --source .common-source --target . --source-sha "$source_sha"
           echo "Source: alehors-srs/Baozi@$source_sha" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Validate shared code and build this site
@@ -57,6 +57,7 @@ jobs:
           python -m unittest discover -s tests -v
           node --check site-config.js
           node --check app.js
+          node --check sentences.js
           node --check sw.js
           python scripts/prepare_site.py --output-dir _site
 
@@ -64,7 +65,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git add -- index.html app.css app.js sw.js scripts/prepare_site.py scripts/sync_dictionary.py scripts/sync_common.py tests/test_sync_dictionary.py tests/test_common_code.py common-version.json
+          git add -- index.html app.css app.js sentences.js sw.js scripts/prepare_site.py scripts/sync_dictionary.py scripts/sync_common.py tests/test_sync_dictionary.py tests/test_common_code.py common-version.json
           if ! git diff --cached --quiet; then
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -92,3 +93,4 @@ jobs:
       - name: Deploy this site
         id: deployment
         uses: actions/deploy-pages@v5
+
