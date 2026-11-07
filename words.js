@@ -361,11 +361,6 @@ window.dictionary = [
     "translation": "сто, сотня, 100"
   },
   {
-    "char": "知道",
-    "pinyin": "zhīdào",
-    "translation": "знать"
-  },
-  {
     "char": "会",
     "pinyin": "huì",
     "translation": "уметь, мочь"
@@ -1314,5 +1309,95 @@ window.dictionary = [
     "char": "那儿",
     "pinyin": "nàr",
     "translation": "там, туда"
+  },
+  {
+    "char": "弟弟",
+    "pinyin": "dìdi",
+    "translation": "Младший брат"
+  },
+  {
+    "char": "起床",
+    "pinyin": "qǐchuáng",
+    "translation": "встать с постели, проснуться"
+  },
+  {
+    "char": "睡觉",
+    "pinyin": "shuìjiào",
+    "translation": "Спать"
+  },
+  {
+    "char": "哪里",
+    "pinyin": "nǎlǐ",
+    "translation": "Где"
+  },
+  {
+    "char": "那里",
+    "pinyin": "nàlǐ",
+    "translation": "Там"
+  },
+  {
+    "char": "要",
+    "pinyin": "yào",
+    "translation": "хотеть, желать, нужно, необходимо, просить, требовать"
+  },
+  {
+    "char": "小朋友",
+    "pinyin": "xiǎopéngyǒu",
+    "translation": "Малыш, дружок"
+  },
+  {
+    "char": "大学",
+    "pinyin": "dàxué",
+    "translation": "университет"
+  },
+  {
+    "char": "大学生",
+    "pinyin": "dàxuéshēng",
+    "translation": "Студент"
+  },
+  {
+    "char": "学",
+    "pinyin": "xué",
+    "translation": "учить, изучать"
+  },
+  {
+    "char": "医",
+    "pinyin": "yī",
+    "translation": "Медицина"
+  },
+  {
+    "char": "时候",
+    "pinyin": "shíhòu",
+    "translation": "Время, промежуток времени, во время"
+  },
+  {
+    "char": "什么时候",
+    "pinyin": "shénmeshíhòu",
+    "translation": "Когда?"
+  },
+  {
+    "char": "正在",
+    "pinyin": "zhèngzài",
+    "translation": "Перед глаголом указывает на то, что действие"
+  },
+  {
+    "char": "知道",
+    "pinyin": "zhīdào",
+    "translation": "знать"
+  },
+  {
+    "char": "找",
+    "pinyin": "zhǎo",
+    "translation": "искать, разыскивать"
+  },
+  {
+    "char": "开车",
+    "pinyin": "kāichē",
+    "translation": "Водить машину"
+  },
+  {
+    "char": "车",
+    "pinyin": "chē",
+    "translation": "автомобиль, машина"
   }
 ];
