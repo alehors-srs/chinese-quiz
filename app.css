@@ -128,7 +128,15 @@
   .loading { text-align: center; font-size: 18px; color: #95a5a6; padding: 40px; }
   
   /* Dictionary search */
-  .dict-search-wrap { max-width: 700px; margin: 0 auto 24px; }
+  .dict-search-wrap {
+    max-width: 700px;
+    width: 100%;
+    margin: 0 auto 24px;
+    padding: 22px 26px;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  }
   .dict-search-input { width: 100%; padding: 14px 18px; font-size: 18px; border: 2px solid #d0d5db; border-radius: 12px; outline: none; transition: border-color 0.2s; }
   .dict-search-input:focus { border-color: #3498db; }
   .dict-results { max-width: 700px; margin: 0 auto; }
@@ -216,8 +224,6 @@
   .test-prev-btn { background: #fff; color: #2c3e50; font-size: 16px; padding: 10px 24px; border: 2px solid #d0d5db; border-radius: 10px; cursor: pointer; transition: all 0.2s; margin-right: 10px; }
   .test-prev-btn:hover:not(:disabled) { border-color: #3498db; color: #3498db; }
   .test-prev-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .test-next-btn { background: #3498db; color: #fff; font-size: 16px; padding: 10px 28px; border: none; border-radius: 10px; cursor: pointer; transition: background 0.2s; margin-top: 20px; }
-  .test-next-btn:hover { background: #2980b9; }
 
   /* Add word section */
   .add-word-section { max-width: 700px; width: 100%; margin: 0 auto 28px; background: #fff; border-radius: 14px; padding: 22px 26px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); box-sizing: border-box; }
@@ -274,7 +280,7 @@ button { touch-action: manipulation; }
 @media (max-width: 768px) {
   body { padding: 16px; }
   h1 { font-size: 26px; margin-bottom: 18px; }
-  .card, .sent-card, .add-word-section { padding: 18px; }
+  .card, .sent-card, .add-word-section, .dict-search-wrap { padding: 18px; }
   .test-card { padding: 24px 18px; }
   .test-start-screen, .test-result { padding: 28px 8px; }
   button, input, select { min-height: 44px; }
@@ -385,11 +391,18 @@ body:has(#tab6.active, #tab8.active) .page-scroll-controls {
   outline: 3px solid #3498db;
   outline-offset: 3px;
 }
-#new-btn,
-#new-btn2 {
-  flex: 0 1 auto;
+#quiz-round .actions,
+#quiz-round2 .actions {
+  flex-wrap: nowrap;
+}
+#quiz-round .actions > button,
+#quiz-round2 .actions > button {
+  flex: 0 1 160px;
   width: 160px;
-  max-width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 12px;
+  white-space: nowrap;
 }
 /* Закрепляем «К разделам» в Словаре и Именах. */
 body:has(#tab6.active, #tab8.active) .section-navigation {
@@ -412,7 +425,8 @@ body:has(#tab6.active, #tab8.active) .section-navigation {
 #sentences-answer { display: block; width: 100%; min-width: 0; resize: vertical; padding: 12px; font: inherit; font-size: 22px; line-height: 1.5; border: 2px solid #d0d5db; border-radius: 10px; }
 #sentences-answer:focus { outline: 2px solid #3498db; outline-offset: 2px; }
 #sentences-answer[readonly] { background: #f4f6f8; }
-#sentences-next-btn { margin-top: 16px; }
+.sentences-navigation { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+.sentences-navigation .test-prev-btn { margin: 0; min-height: 44px; }
 .sentences-feedback { margin-top: 20px; padding: 16px; border-radius: 12px; background: #f4f6f8; overflow-wrap: anywhere; }
 .sentences-feedback p, .sentences-review p { margin-bottom: 10px; line-height: 1.55; white-space: pre-wrap; }
 .sentences-feedback.is-correct { border-left: 4px solid #23824a; background: #eafaf1; }
@@ -423,7 +437,7 @@ body:has(#tab6.active, #tab8.active) .section-navigation {
 .sentences-speak { color: #2c3e50; width: 44px; height: 44px; }
 .sentences-review { margin-block: 16px; overflow-wrap: anywhere; }
 .sentences-review h3 { margin-bottom: 12px; }
-.sentences-reset { display: block; margin: 24px auto; padding: 12px 22px; border: 1px solid #526b7f; border-radius: 10px; background: #fff; color: #2c3e50; cursor: pointer; }
+.sentences-reset { display: block; margin: 24px auto; }
 .sentences-reset[hidden] { display: none; }
 .sentences-wrap button:disabled { opacity: .6; cursor: wait; }
 #sentences-score { text-align: center; margin-block: 20px; }
@@ -431,4 +445,49 @@ body:has(#tab6.active, #tab8.active) .section-navigation {
   .sentences-card, .sentences-review { padding: 18px; }
   .sentences-prompt { font-size: 21px; }
   .sentences-wrap .test-btn { max-width: 100%; padding-inline: 22px; }
+}
+
+
+.dictionary-heading {
+  text-align: center;
+  margin-bottom: 14px;
+  color: #2c3e50;
+}
+.test-navigation {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  max-width: 600px;
+  margin: 0 auto 16px;
+}
+.test-navigation > button {
+  margin: 0;
+  white-space: nowrap;
+}
+.test-navigation .test-sound-toggle {
+  flex: 0 0 44px;
+}
+.test-navigation .test-prev-btn {
+  flex: 0 1 auto;
+  min-width: 0;
+  min-height: 44px;
+}
+.test-restart-wrap {
+  text-align: center;
+  margin-top: 20px;
+}
+#sentences-check-btn {
+  background: #2ecc71;
+}
+#sentences-check-btn:hover:not(:disabled) {
+  background: #27ae60;
+}
+@media (max-width: 480px) {
+  .test-navigation { gap: 6px; }
+  .test-navigation .test-prev-btn {
+    padding-inline: 8px;
+    font-size: 14px;
+  }
 }
