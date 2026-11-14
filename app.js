@@ -159,7 +159,7 @@ const backToSectionsButton = document.getElementById('back-to-sections');
 let lastSectionButton = null;
 
 backToSectionsButton.addEventListener('click', () => {
-  document.querySelectorAll('.tab-content').forEach(section => {
+  document.querySelectorAll('.tab-content:not(.word-panel)').forEach(section => {
     section.classList.remove('active');
   });
   document.querySelectorAll('.tab').forEach(button => {
@@ -183,7 +183,7 @@ document.querySelectorAll('.tab').forEach(tab => {
       button.setAttribute('aria-expanded', String(selected));
     });
 
-    document.querySelectorAll('.tab-content').forEach(section => {
+    document.querySelectorAll('.tab-content:not(.word-panel)').forEach(section => {
       section.classList.toggle('active', section.id === sectionId);
     });
 
@@ -193,11 +193,24 @@ document.querySelectorAll('.tab').forEach(tab => {
     backToSectionsButton.focus({ preventScroll: true });
     window.scrollTo(0, 0);
 
-    if (!initializedSections.has(sectionId)) {
-      if (sectionId === 'tab1') showQuizStart();
-      if (sectionId === 'tab2') showQuizStart('2');
+  });
+});
 
-      initializedSections.add(sectionId);
+// Подразделы слов сохраняют выбранный режим и независимый прогресс.
+const wordPanelButtons = [...document.querySelectorAll('[data-word-panel]')];
+wordPanelButtons.forEach(button => {
+  button.addEventListener('click', () => {
+    const panelId = button.dataset.wordPanel;
+    wordPanelButtons.forEach(item => {
+      const selected = item === button;
+      const panel = document.getElementById(item.dataset.wordPanel);
+      item.setAttribute('aria-pressed', String(selected));
+      panel.hidden = !selected;
+      panel.classList.toggle('active', selected);
+    });
+    if (!initializedSections.has(panelId)) {
+      showQuizStart(panelId === 'tab2' ? '2' : '');
+      initializedSections.add(panelId);
     }
   });
 });
@@ -291,7 +304,7 @@ function updateQuizCardInPlace(quiz, state, focusInput, reverse = false) {
     : 'Пиньинь: ' + (item.pinyin || '—') + ' | Перевод: ' + item.translation;
   card.querySelector('.hint-link').textContent = 'показать ответ';
   state.answered = false;
-  if (focusInput && quiz.closest('.tab-content').classList.contains('active')) {
+  if (focusInput && quiz.getClientRects().length > 0) {
     input.focus({ preventScroll: true });
   }
   return true;
@@ -300,7 +313,7 @@ function updateQuizCardInPlace(quiz, state, focusInput, reverse = false) {
 function moveQuizNext(state, render, buttonId, delay = 0) {
   if (state.transitioning || state.idx >= state.items.length) return;
   const section = document.getElementById(buttonId).closest('.tab-content');
-  if (section.classList.contains('active')) {
+  if (section.getClientRects().length > 0) {
     const input = section.querySelector('.card input');
     if (input) input.focus({ preventScroll: true });
   }
@@ -398,7 +411,7 @@ function renderQuizCard(focusInput = false) {
   quiz1State.answered = false;
   const inp = card.querySelector('input');
   // Вход в раздел — без курсора; следующая видимая карточка — с курсором.
-  if (focusInput && inp.closest('.tab-content').classList.contains('active')) {
+  if (focusInput && inp.getClientRects().length > 0) {
     inp.focus({ preventScroll: true });
   }
   inp.addEventListener('keydown', e => {
@@ -511,7 +524,7 @@ function renderQuiz2Card(focusInput = false) {
   quiz2State.answered = false;
   const inp = card.querySelector('input');
   // Вход в раздел — без курсора; следующая видимая карточка — с курсором.
-  if (focusInput && inp.closest('.tab-content').classList.contains('active')) {
+  if (focusInput && inp.getClientRects().length > 0) {
     inp.focus({ preventScroll: true });
   }
   inp.addEventListener('keydown', e => {
@@ -1298,7 +1311,7 @@ let testCount = 10;
 let testPool = 'all';
 let testMainQuestions = [];
 let testIsReinforcement = false;
-let testSoundEnabled = true;
+let testSoundEnabled = false;
 let testVersion = 0;
 const testTimers = new Set();
 
@@ -1614,6 +1627,10 @@ document.getElementById('test-restart-during-btn').addEventListener('click', res
 document.getElementById('test-sound-toggle').addEventListener('click', function() {
   testSoundEnabled = !testSoundEnabled;
   this.textContent = testSoundEnabled ? '🔊' : '🔇';
+  this.setAttribute('aria-pressed', String(testSoundEnabled));
+  const label = testSoundEnabled ? 'Отключить озвучку' : 'Включить озвучку';
+  this.setAttribute('aria-label', label);
+  this.title = label;
   if (!testSoundEnabled) {
     this.classList.add('muted');
   } else {
@@ -1646,6 +1663,365 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
       .catch(error => console.warn('Не удалось включить офлайн-режим:', error));
   });
 }
+
+
+
+
+
+// === HANZI PRACTICE: ввод показанного иероглифа ===
+const HanziPractice = (() => {
+  // Чтения отдельных знаков получаем только от подключённой pinyin-pro.
+  function getReadings(char, provider) {
+    let external = [];
+    if (provider && typeof provider.pinyin === 'function') {
+      try { external = provider.pinyin(char, { type: 'array', multiple: true, toneType: 'symbol' }); }
+      catch (_) {}
+    }
+    const available = Array.isArray(external) ? external : [];
+    return [...new Set(available.filter(value => typeof value === 'string')
+      .map(value => value.trim().toLowerCase().normalize('NFC'))
+      .filter(value => /^[\p{Script=Latin}\p{Mark}]+$/u.test(value)))];
+  }
+  function normalizeCharacter(value) {
+    return String(value ?? '').trim().normalize('NFC');
+  }
+  function check(user, char) {
+    const answer = normalizeCharacter(user);
+    return !!answer && answer === normalizeCharacter(char);
+  }
+  function buildPool(words, names, provider) {
+    const unique = new Map();
+    for (const entry of [...words, ...names]) {
+      for (const char of new Set(Array.from(entry.char || ''))) {
+        if (!/\p{Script=Han}/u.test(char)) continue;
+        if (!unique.has(char)) unique.set(char, []);
+        const examples = unique.get(char);
+        if (examples.length < 3 && !examples.some(example =>
+            example.char === entry.char && example.pinyin === entry.pinyin && example.translation === entry.translation)) {
+          examples.push({ char: entry.char, pinyin: entry.pinyin || '', translation: entry.translation || '' });
+        }
+      }
+    }
+    return { cards: Array.from(unique, ([char, examples]) => ({ char, readings: getReadings(char, provider), examples })), total: unique.size };
+  }
+  // Закрепление хранит свои попытки и не меняет основной результат.
+  function createRound(pool, count, randomize) {
+    if (![10, 25].includes(count) || pool.length < count) throw new Error('Недостаточно иероглифов для раунда');
+    return {
+      main: randomize(pool).slice(0, count).map(card => ({
+        char: card.char,
+        readings: (card.readings || []).slice(),
+        examples: (card.examples || []).map(example => ({ ...example }))
+      })),
+      current: [], index: 0, attempts: [], drafts: [], mistakes: [], reinforcement: false
+    };
+  }
+  function begin(round) {
+    round.current = round.main;
+    return round;
+  }
+  function answer(round, text) {
+    const card = round.current[round.index];
+    if (!card || round.attempts[round.index]) return null;
+    const attempt = { ...card, user: String(text), correct: check(text, card.char) };
+    round.attempts[round.index] = attempt;
+    if (!attempt.correct) round.mistakes.push(card);
+    return attempt;
+  }
+  function advance(round, randomize) {
+    if (!round.attempts[round.index]) return 'unanswered';
+    round.index++;
+    if (round.index < round.current.length) return 'next';
+    if (!round.reinforcement) round.mainResults = round.attempts.slice();
+    if (!round.mistakes.length) return 'complete';
+    round.current = randomize(round.mistakes);
+    round.mistakes = [];
+    round.attempts = [];
+    round.drafts = [];
+    round.index = 0;
+    round.reinforcement = true;
+    return 'reinforcement';
+  }
+  function previous(round, draft) {
+    if (round.index <= 0) return false;
+    if (!round.attempts[round.index]) round.drafts[round.index] = String(draft ?? '');
+    round.index--;
+    return true;
+  }
+
+  // Отмена звука/таймера делает устаревшие callbacks бездействующими.
+  function createPlayback({ speak, stop, setTimer, clearTimer, onAdvance, isActive }) {
+    let version = 0, timer = null, pending = false, ownsAudio = false;
+    function stopAudio() {
+      if (!ownsAudio) return;
+      ownsAudio = false;
+      try { stop(); } catch (_) {}
+    }
+    function cancel() {
+      version++;
+      if (timer !== null) clearTimer(timer);
+      timer = null;
+      pending = false;
+      stopAudio();
+    }
+    function schedule(enabled, char) {
+      cancel();
+      const current = version;
+      pending = true;
+      function advanceWhenVisible() {
+        if (current !== version || !pending) return;
+        pending = false;
+        timer = null;
+        if (isActive()) onAdvance();
+      }
+      if (!enabled) { timer = setTimer(advanceWhenVisible, 1005); return; }
+      let finished = false;
+      function done() {
+        if (finished || current !== version) return;
+        finished = true;
+        if (timer !== null) clearTimer(timer);
+        stopAudio();
+        timer = setTimer(advanceWhenVisible, 505);
+      }
+      ownsAudio = true;
+      timer = setTimer(done, 8000);
+      try { speak(char, done); } catch (_) { done(); }
+    }
+    function play(char) {
+      cancel();
+      const current = version;
+      ownsAudio = true;
+      timer = setTimer(() => { if (current === version) cancel(); }, 8000);
+      try {
+        speak(char, () => {
+          if (current !== version) return;
+          if (timer !== null) clearTimer(timer);
+          timer = null;
+          ownsAudio = false;
+        });
+      } catch (_) { cancel(); }
+    }
+    return Object.freeze({ cancel, schedule, play, isPending: () => pending });
+  }
+  // IME может завершить композицию до события Enter/submit (например, в Safari).
+  function canSubmit(composing, lastCompositionEnd, now, event = {}) {
+    return !composing && !event.isComposing && event.keyCode !== 229 && now - lastCompositionEnd > 50;
+  }
+  return Object.freeze({ normalizeCharacter, check, getReadings, buildPool, createRound, begin, answer, advance, previous, createPlayback, canSubmit });
+})();
+
+function initializeHanziPractice() {
+  const section = document.getElementById('tab10');
+  if (!section) return;
+  const element = name => document.getElementById('hanzi-' + name);
+  let round = null;
+  let composing = false;
+  let lastCompositionEnd = -Infinity;
+  let soundEnabled = false;
+  const playback = HanziPractice.createPlayback({
+    speak: speakChineseWithCallback,
+    stop: () => {
+      if (typeof responsiveVoice !== 'undefined') responsiveVoice.cancel();
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    },
+    setTimer: (callback, delay) => setTimeout(callback, delay),
+    clearTimer: timer => clearTimeout(timer),
+    onAdvance: () => next(),
+    isActive: () => !document.hidden && section.classList.contains('active')
+  });
+
+  function pool() { return HanziPractice.buildPool(dictionary, namesData, window.pinyinPro); }
+  function updateInfo() {
+  }
+  function updateSoundButton() {
+    const button = element('sound-toggle');
+    button.textContent = soundEnabled ? '🔊' : '🔇';
+    button.classList.toggle('muted', !soundEnabled);
+    button.setAttribute('aria-pressed', String(soundEnabled));
+    const label = soundEnabled ? 'Отключить озвучку ответов' : 'Включить озвучку ответов';
+    button.setAttribute('aria-label', label);
+    button.title = label;
+  }
+  function showStart() {
+    playback.cancel();
+    round = null;
+    composing = false;
+    element('start').hidden = false;
+    element('round').hidden = true;
+    element('result').hidden = true;
+    element('status').textContent = '';
+    updateInfo();
+    if (section.contains(document.activeElement)) document.activeElement.blur();
+  }
+  function setHintVisible(visible) {
+    element('hint').hidden = !visible;
+    element('hint').classList.toggle('show', visible);
+    element('hint-toggle').setAttribute('aria-expanded', String(visible));
+    element('hint-toggle').textContent = visible ? 'скрыть подсказку' : 'показать подсказку';
+  }
+  function renderCard(focus, preserveHint = false) {
+    const card = round.current[round.index];
+    const attempt = round.attempts[round.index];
+    const hintOpen = preserveHint && !element('hint').hidden;
+    const pinyinText = 'Пиньинь: ' + (card.readings.length ? card.readings.join(', ') : 'недоступен');
+    element('progress').textContent = 'Иероглиф ' + (round.index + 1) + ' из ' + round.current.length;
+    element('stage').textContent = round.reinforcement ? 'Закрепление ошибок' : '';
+    element('char').textContent = card.char;
+    element('card').classList.toggle('correct', !!attempt && attempt.correct);
+    element('card').classList.toggle('wrong', !!attempt && !attempt.correct);
+    element('answer').value = attempt ? attempt.user : (round.drafts[round.index] || '');
+    element('answer').readOnly = !!attempt;
+    if (attempt) element('answer').setAttribute('aria-invalid', String(!attempt.correct));
+    else element('answer').removeAttribute('aria-invalid');
+    element('feedback').replaceChildren();
+    if (attempt) {
+      element('feedback').append(
+        makeElement('div', '', (attempt.correct ? 'Верно! ' : 'Неверно. ') + 'Иероглиф: ' + attempt.char),
+        makeElement('div', 'hanzi-feedback-pinyin', pinyinText)
+      );
+    }
+    element('hint').replaceChildren(makeElement('div', '', pinyinText));
+    if (card.examples.length) {
+      element('hint').appendChild(makeElement('div', 'hanzi-hint-label', 'Примеры из словаря:'));
+      for (const example of card.examples) {
+        element('hint').appendChild(makeElement('div', '', example.char +
+          (example.pinyin ? ' (' + example.pinyin + ')' : '') +
+          (example.translation ? ' — ' + example.translation : '')));
+      }
+    }
+    setHintVisible(hintOpen);
+    element('check-btn').disabled = !!attempt;
+    element('next-btn').disabled = !attempt;
+    const charElement = element('char');
+    charElement.classList.toggle('test-char-clickable', !!attempt);
+    charElement.title = attempt ? 'Нажмите, чтобы прослушать' : '';
+    if (attempt) {
+      charElement.setAttribute('role', 'button');
+      charElement.setAttribute('tabindex', '0');
+      charElement.setAttribute('aria-label', 'Прослушать иероглиф ' + card.char);
+    } else {
+      charElement.removeAttribute('role');
+      charElement.removeAttribute('tabindex');
+      charElement.removeAttribute('aria-label');
+    }
+    element('prev-btn').disabled = round.index <= 0;
+    if (focus && section.classList.contains('active')) element('answer').focus({ preventScroll: true });
+  }
+  function start() {
+    const { cards, total } = pool();
+    const count = Number(element('count').value);
+    if (total < count) {
+      element('status').textContent = 'Для раунда нужно ' + count + ' разных иероглифов. Сейчас доступно: ' + total + '.';
+      return;
+    }
+    playback.cancel();
+    round = HanziPractice.begin(HanziPractice.createRound(cards, count, shuffle));
+    element('status').textContent = '';
+    element('start').hidden = true;
+    element('result').hidden = true;
+    element('round').hidden = false;
+    renderCard(false);
+  }
+  function submit() {
+    if (!round || composing) return;
+    const attempt = HanziPractice.answer(round, element('answer').value);
+    if (!attempt) return;
+    const checkWasFocused = document.activeElement === element('check-btn');
+    renderCard(false, true);
+    if (checkWasFocused) element('next-btn').focus({ preventScroll: true });
+    playback.schedule(soundEnabled, attempt.char);
+  }
+  function finish() {
+    playback.cancel();
+    element('round').hidden = true;
+    element('result').hidden = false;
+    const results = round.mainResults;
+    const score = results.filter(result => result.correct).length;
+    element('score').textContent = 'Основной тест: ' + score + ' / ' + results.length;
+    element('score').className = 'test-result-score ' + (score === results.length ? 'score-green' : score >= Math.ceil(results.length * 0.7) ? 'score-orange' : 'score-red');
+    element('result-message').textContent = round.reinforcement ? 'Закрепление завершено ✓' : 'Все ответы верны! 🎉';
+    const list = element('results-list');
+    list.replaceChildren();
+    for (const result of results) {
+      const row = makeElement('div', 'hanzi-result-row ' + (result.correct ? 'ok' : 'err'));
+      row.append(
+        makeElement('div', '', (result.correct ? '✓ ' : '✗ ') + result.char),
+        makeElement('div', '', 'Ваш ответ: ' + (result.user.trim() || '(пусто)'))
+      );
+      list.appendChild(row);
+    }
+    element('restart-btn').focus({ preventScroll: true });
+  }
+  function next() {
+    if (!round) return;
+    playback.cancel();
+    const result = HanziPractice.advance(round, shuffle);
+    if (result === 'unanswered') return;
+    if (result === 'complete') { finish(); return; }
+    renderCard(true);
+  }
+  function previous() {
+    playback.cancel();
+    if (round && HanziPractice.previous(round, element('answer').value)) renderCard(false);
+  }
+  element('form').addEventListener('submit', event => {
+    event.preventDefault();
+    if (!round || !HanziPractice.canSubmit(composing, lastCompositionEnd, performance.now())) return;
+    if (round.attempts[round.index]) next(); else submit();
+  });
+  element('answer').addEventListener('compositionstart', () => { composing = true; });
+  element('answer').addEventListener('compositionend', () => {
+    composing = false;
+    lastCompositionEnd = performance.now();
+  });
+  element('answer').addEventListener('keydown', event => {
+    if (event.key === 'Enter' && HanziPractice.canSubmit(composing, lastCompositionEnd, performance.now(), event)) {
+      event.preventDefault();
+      if (round && round.attempts[round.index]) next(); else submit();
+    }
+  });
+  element('hint-toggle').addEventListener('click', () => setHintVisible(element('hint').hidden));
+  element('next-btn').addEventListener('click', next);
+  element('prev-btn').addEventListener('click', previous);
+  element('start-btn').addEventListener('click', start);
+  element('reset-btn').addEventListener('click', showStart);
+  element('restart-btn').addEventListener('click', showStart);
+  element('sound-toggle').addEventListener('click', () => {
+    const wasPending = playback.isPending();
+    playback.cancel();
+    soundEnabled = !soundEnabled;
+    updateSoundButton();
+    if (wasPending && round && round.attempts[round.index]) {
+      playback.schedule(soundEnabled, round.current[round.index].char);
+    }
+  });
+  function playReviewedCharacter() {
+    if (round && round.attempts[round.index]) playback.play(round.current[round.index].char);
+  }
+  element('char').addEventListener('click', playReviewedCharacter);
+  element('char').addEventListener('keydown', event => {
+    if ((event.key === 'Enter' || event.key === ' ') && round && round.attempts[round.index]) {
+      event.preventDefault();
+      playReviewedCharacter();
+    }
+  });
+  // Клики не убирают экранную клавиатуру, если поле ввода уже было активно.
+  for (const name of ['check-btn', 'next-btn', 'prev-btn', 'char', 'sound-toggle', 'hint-toggle']) {
+    element(name).addEventListener('pointerdown', event => {
+      if (event.isPrimary && event.button === 0 && document.activeElement === element('answer')) event.preventDefault();
+    });
+  }
+  document.querySelectorAll('.tab').forEach(button => button.addEventListener('click', () => {
+    if (button.dataset.tab === 'tab10') updateInfo(); else playback.cancel();
+  }));
+  document.getElementById('back-to-sections').addEventListener('click', () => playback.cancel());
+  document.addEventListener('visibilitychange', () => { if (document.hidden) playback.cancel(); });
+  updateSoundButton();
+  showStart();
+}
+initializeHanziPractice();
+
+
 
 
 
