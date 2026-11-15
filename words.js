@@ -1399,5 +1399,10 @@ window.dictionary = [
     "char": "车",
     "pinyin": "chē",
     "translation": "автомобиль, машина"
+  },
+  {
+    "char": "她们",
+    "pinyin": "tāmen",
+    "translation": "Они"
   }
 ];
