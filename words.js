@@ -1404,5 +1404,135 @@ window.dictionary = [
     "char": "她们",
     "pinyin": "tāmen",
     "translation": "Они"
+  },
+  {
+    "char": "花",
+    "pinyin": "huā",
+    "translation": "цветок"
+  },
+  {
+    "char": "睡",
+    "pinyin": "shuì",
+    "translation": "Спать"
+  },
+  {
+    "char": "回",
+    "pinyin": "huí",
+    "translation": "Возвращаться"
+  },
+  {
+    "char": "蛋糕",
+    "pinyin": "dàngāo",
+    "translation": "Торт"
+  },
+  {
+    "char": "跟",
+    "pinyin": "gēn",
+    "translation": "С (в значении с кем-либо)"
+  },
+  {
+    "char": "公园",
+    "pinyin": "gōngyuán",
+    "translation": "Парк"
+  },
+  {
+    "char": "游戏",
+    "pinyin": "yóuxì",
+    "translation": "Игра"
+  },
+  {
+    "char": "因为",
+    "pinyin": "yīnwèi",
+    "translation": "потому что, из-за"
+  },
+  {
+    "char": "自己",
+    "pinyin": "zìjǐ",
+    "translation": "Сам, самостоятельно"
+  },
+  {
+    "char": "小时",
+    "pinyin": "xiǎoshí",
+    "translation": "Час (исп-ся для количества часов"
+  },
+  {
+    "char": "床",
+    "pinyin": "chuáng",
+    "translation": "Кровать"
+  },
+  {
+    "char": "难",
+    "pinyin": "nán",
+    "translation": "Сложный, трудный"
+  },
+  {
+    "char": "红菜汤",
+    "pinyin": "hóngcàitāng",
+    "translation": "Борщ"
+  },
+  {
+    "char": "每",
+    "pinyin": "měi",
+    "translation": "каждый"
+  },
+  {
+    "char": "的时候",
+    "pinyin": "deshíhòu",
+    "translation": "Когда"
+  },
+  {
+    "char": "什么时候",
+    "pinyin": "shénmeshíhòu",
+    "translation": "Когда (когда ты успела?)"
+  },
+  {
+    "char": "当",
+    "pinyin": "dāng",
+    "translation": "Быть, являться"
+  },
+  {
+    "char": "黑色",
+    "pinyin": "hēisè",
+    "translation": "Черный"
+  },
+  {
+    "char": "橙子",
+    "pinyin": "chéngzi",
+    "translation": "Апельсин"
+  },
+  {
+    "char": "橙",
+    "pinyin": "chéng",
+    "translation": "Оранжевый"
+  },
+  {
+    "char": "菠萝",
+    "pinyin": "bōluó",
+    "translation": "Ананас"
+  },
+  {
+    "char": "草",
+    "pinyin": "cǎo",
+    "translation": "Трава, сено"
+  },
+  {
+    "char": "草莓",
+    "pinyin": "cǎoméi",
+    "translation": "Клубника, земляника"
+  },
+  {
+    "char": "香蕉",
+    "pinyin": "xiāngjiāo",
+    "translation": "Банан"
+  },
+  {
+    "char": "找",
+    "pinyin": "zhǎo",
+    "translation": "Найти, искать"
+  },
+  {
+    "char": "现在",
+    "pinyin": "xiànzài",
+    "translation": "Сейчас"
   }
 ];
