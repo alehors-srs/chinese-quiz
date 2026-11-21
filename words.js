@@ -1534,5 +1534,35 @@ window.dictionary = [
     "char": "现在",
     "pinyin": "xiànzài",
     "translation": "Сейчас"
+  },
+  {
+    "char": "剧场",
+    "pinyin": "jùchǎng",
+    "translation": "Театр"
+  },
+  {
+    "char": "更",
+    "pinyin": "gèng",
+    "translation": "Более, больше"
+  },
+  {
+    "char": "芭蕾舞",
+    "pinyin": "bālěiwǔ",
+    "translation": "Балет"
+  },
+  {
+    "char": "笑",
+    "pinyin": "xiào",
+    "translation": "Улыбаться"
+  },
+  {
+    "char": "礼物",
+    "pinyin": "lǐwù",
+    "translation": "Подарок"
+  },
+  {
+    "char": "给",
+    "pinyin": "gěi",
+    "translation": "Для"
   }
 ];
