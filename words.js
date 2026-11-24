@@ -1564,5 +1564,100 @@ window.dictionary = [
     "char": "给",
     "pinyin": "gěi",
     "translation": "Для"
+  },
+  {
+    "char": "天气",
+    "pinyin": "tiānqì",
+    "translation": "Погода"
+  },
+  {
+    "char": "这里",
+    "pinyin": "zhèlǐ",
+    "translation": "здесь"
+  },
+  {
+    "char": "天",
+    "pinyin": "tiān",
+    "translation": "день, небо"
+  },
+  {
+    "char": "下雨",
+    "pinyin": "xiàyǔ",
+    "translation": "Идет дождь"
+  },
+  {
+    "char": "了",
+    "pinyin": "Le",
+    "translation": "Глагольный суффикс завершенности действия"
+  },
+  {
+    "char": "雨",
+    "pinyin": "yǔ",
+    "translation": "Дождь"
+  },
+  {
+    "char": "有点儿",
+    "pinyin": "yǒudiǎnr",
+    "translation": "Немного"
+  },
+  {
+    "char": "一点儿",
+    "pinyin": "yìdiǎnr",
+    "translation": "Немного, чуть-чуть"
+  },
+  {
+    "char": "冷",
+    "pinyin": "lěng",
+    "translation": "Холодно, холодный, холод"
+  },
+  {
+    "char": "下雪",
+    "pinyin": "xiàxuě",
+    "translation": "Снегопад"
+  },
+  {
+    "char": "下",
+    "pinyin": "xià",
+    "translation": "Идти, падать (снег, дождь)"
+  },
+  {
+    "char": "来",
+    "pinyin": "lái",
+    "translation": "Приходить, прибывать, приезжать"
+  },
+  {
+    "char": "生病",
+    "pinyin": "shēngbìng",
+    "translation": "Заболеть"
+  },
+  {
+    "char": "看病",
+    "pinyin": "kànbìng",
+    "translation": "Осматривать больного, посещать врача"
+  },
+  {
+    "char": "病",
+    "pinyin": "bìng",
+    "translation": "Болезнь, болеть"
+  },
+  {
+    "char": "药",
+    "pinyin": "yào",
+    "translation": "лекарство, медикаменты"
+  },
+  {
+    "char": "再",
+    "pinyin": "zài",
+    "translation": "Снова, опять, еще"
+  },
+  {
+    "char": "热",
+    "pinyin": "rè",
+    "translation": "Горячий"
+  },
+  {
+    "char": "水",
+    "pinyin": "shuǐ",
+    "translation": "Вода"
   }
 ];
